@@ -13,6 +13,5 @@
 #import "XMPPvCardTempModule.h"
 #import "XMPPMessage+XEP_0071.h"
 #import "XMPPMessage+XEP_0085.h"
-#import "XMPPPresence+XEP_0152.h"
+#import "XMPPPresence+XEP_0153.h"
 #import "XMPPAutoPing.h"
-#import "XMPPPing.h"
