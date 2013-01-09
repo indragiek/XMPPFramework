@@ -136,8 +136,8 @@
 	XMPPPresence *mp = [self presence];
 	XMPPPresence *ap = [another presence];
 	
-	int mpp = [mp priority];
-	int app = [ap priority];
+	NSInteger mpp = [mp priority];
+	NSInteger app = [ap priority];
 	
 	if(mpp < app)
 		return NSOrderedDescending;
