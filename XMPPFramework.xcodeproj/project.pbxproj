@@ -556,9 +556,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		039367BB169D2AE300986388 /* libXMPPFramework */ = {
+		039367BB169D2AE300986388 /* XMPPFramework */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 039367BD169D2AE300986388 /* Build configuration list for PBXNativeTarget "libXMPPFramework" */;
+			buildConfigurationList = 039367BD169D2AE300986388 /* Build configuration list for PBXNativeTarget "XMPPFramework" */;
 			buildPhases = (
 				039367B8169D2AE300986388 /* Sources */,
 				039367B9169D2AE300986388 /* Frameworks */,
@@ -568,7 +568,7 @@
 			);
 			dependencies = (
 			);
-			name = libXMPPFramework;
+			name = XMPPFramework;
 			productName = libXMPPFramework;
 			productReference = 039367BC169D2AE300986388 /* liblibXMPPFramework.a */;
 			productType = "com.apple.product-type.library.static";
@@ -594,7 +594,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				039367BB169D2AE300986388 /* libXMPPFramework */,
+				039367BB169D2AE300986388 /* XMPPFramework */,
 			);
 		};
 /* End PBXProject section */
@@ -738,7 +738,7 @@
 					"\"$(SRCROOT)/XMPPFramework/LibIDN\"",
 				);
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = XMPPFramework;
 			};
 			name = Debug;
 		};
@@ -752,7 +752,7 @@
 					"\"$(SRCROOT)/XMPPFramework/LibIDN\"",
 				);
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = XMPPFramework;
 			};
 			name = Release;
 		};
@@ -768,7 +768,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		039367BD169D2AE300986388 /* Build configuration list for PBXNativeTarget "libXMPPFramework" */ = {
+		039367BD169D2AE300986388 /* Build configuration list for PBXNativeTarget "XMPPFramework" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				039367BE169D2AE300986388 /* Debug */,
