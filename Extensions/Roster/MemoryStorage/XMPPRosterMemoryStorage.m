@@ -769,9 +769,6 @@
 	
 	if (change == XMPP_USER_REMOVED_RESOURCE)
 		[[self multicastDelegate] xmppRoster:self didRemoveResource:resource withUser:user];
-	
-	if (change != XMPP_USER_NO_CHANGE)
-		[[self multicastDelegate] xmppRosterDidChange:self];
 }
 
 - (BOOL)userExistsWithJID:(XMPPJID *)jid xmppStream:(XMPPStream *)stream
