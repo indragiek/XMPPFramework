@@ -91,6 +91,10 @@ NSString *const kXMPPvCardTempElement = @"vCard";
   return iq;
 }
 
+- (id)init
+{
+	return [super initWithName:kXMPPvCardTempElement xmlns:kXMPPNSvCardTemp];
+}
 
 #pragma mark -
 #pragma mark Identification Types
