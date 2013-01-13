@@ -21,7 +21,6 @@
 		039367CB169D2B2600986388 /* NSNumber+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366CE169D26B300986388 /* NSNumber+XMPP.m */; };
 		039367CC169D2B2600986388 /* NSXMLElement+XMPP.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366D0169D26B300986388 /* NSXMLElement+XMPP.m */; };
 		039367CD169D2B2600986388 /* LibIDN.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366D9169D26B300986388 /* LibIDN.m */; };
-		039367CE169D2B2600986388 /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366DD169D26B300986388 /* XMPPReconnect.m */; };
 		039367CF169D2B2600986388 /* XMPPResourceMemoryStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366E1169D26B300986388 /* XMPPResourceMemoryStorageObject.m */; };
 		039367D0169D2B2600986388 /* XMPPRosterMemoryStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366E3169D26B300986388 /* XMPPRosterMemoryStorage.m */; };
 		039367D1169D2B2600986388 /* XMPPUserMemoryStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366E6169D26B400986388 /* XMPPUserMemoryStorageObject.m */; };
@@ -92,8 +91,6 @@
 		039366D8169D26B300986388 /* LibIDN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibIDN.h; sourceTree = "<group>"; };
 		039366D9169D26B300986388 /* LibIDN.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LibIDN.m; sourceTree = "<group>"; };
 		039366DA169D26B300986388 /* stringprep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringprep.h; sourceTree = "<group>"; };
-		039366DC169D26B300986388 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
-		039366DD169D26B300986388 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		039366E0169D26B300986388 /* XMPPResourceMemoryStorageObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPResourceMemoryStorageObject.h; sourceTree = "<group>"; };
 		039366E1169D26B300986388 /* XMPPResourceMemoryStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPResourceMemoryStorageObject.m; sourceTree = "<group>"; };
 		039366E2169D26B300986388 /* XMPPRosterMemoryStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPRosterMemoryStorage.h; sourceTree = "<group>"; };
@@ -179,7 +176,7 @@
 		039367AB169D298F00986388 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDLog.m; path = GCDAsyncSocket/CocoaLumberjack/DDLog.m; sourceTree = "<group>"; };
 		039367AC169D298F00986388 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DDTTYLogger.h; path = GCDAsyncSocket/CocoaLumberjack/DDTTYLogger.h; sourceTree = "<group>"; };
 		039367AD169D298F00986388 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DDTTYLogger.m; path = GCDAsyncSocket/CocoaLumberjack/DDTTYLogger.m; sourceTree = "<group>"; };
-		039367BC169D2AE300986388 /* liblibXMPPFramework.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblibXMPPFramework.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		039367BC169D2AE300986388 /* liblibXMPPFramework.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = liblibXMPPFramework.a; path = libXMPPFramework.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		039367F3169D2C8C00986388 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		03936804169D2CE800986388 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		03936806169D2D2700986388 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
@@ -248,7 +245,6 @@
 				039366BC169D26B300986388 /* Authentication */,
 				039366CA169D26B300986388 /* Categories */,
 				039366D4169D26B300986388 /* LibIDN */,
-				039366DB169D26B300986388 /* Reconnect */,
 				039366DE169D26B300986388 /* Roster */,
 				039366EC169D26B400986388 /* Utilities */,
 				039366F6169D26B400986388 /* XEP-0054 - vCard */,
@@ -346,15 +342,6 @@
 				039366DA169D26B300986388 /* stringprep.h */,
 			);
 			path = LibIDN;
-			sourceTree = "<group>";
-		};
-		039366DB169D26B300986388 /* Reconnect */ = {
-			isa = PBXGroup;
-			children = (
-				039366DC169D26B300986388 /* XMPPReconnect.h */,
-				039366DD169D26B300986388 /* XMPPReconnect.m */,
-			);
-			path = Reconnect;
 			sourceTree = "<group>";
 		};
 		039366DE169D26B300986388 /* Roster */ = {
@@ -618,7 +605,6 @@
 				039367CB169D2B2600986388 /* NSNumber+XMPP.m in Sources */,
 				039367CC169D2B2600986388 /* NSXMLElement+XMPP.m in Sources */,
 				039367CD169D2B2600986388 /* LibIDN.m in Sources */,
-				039367CE169D2B2600986388 /* XMPPReconnect.m in Sources */,
 				039367CF169D2B2600986388 /* XMPPResourceMemoryStorageObject.m in Sources */,
 				039367D0169D2B2600986388 /* XMPPRosterMemoryStorage.m in Sources */,
 				039367D1169D2B2600986388 /* XMPPUserMemoryStorageObject.m in Sources */,

@@ -7,7 +7,6 @@
 //
 
 #import "XMPP.h"
-#import "XMPPReconnect.h"
 #import "XMPPRoster.h"
 #import "XMPPRosterMemoryStorage.h"
 #import "XMPPvCardTempModule.h"
