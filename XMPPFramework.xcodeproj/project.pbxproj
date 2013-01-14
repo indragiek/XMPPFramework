@@ -13,7 +13,7 @@
 		035B5B9416A364000098CB09 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367A9169D298F00986388 /* DDFileLogger.m */; };
 		035B5B9516A364000098CB09 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367AB169D298F00986388 /* DDLog.m */; };
 		035B5B9616A364000098CB09 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367AD169D298F00986388 /* DDTTYLogger.m */; };
-		035B5B9716A364000098CB09 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367A0169D297E00986388 /* GCDAsyncSocket.m */; };
+		035B5B9716A364000098CB09 /* GCDAsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367A0169D297E00986388 /* GCDAsyncSocket.m */; settings = {COMPILER_FLAGS = "-w"; }; };
 		035B5B9816A364000098CB09 /* XMPPDeprecatedDigestAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366BF169D26B300986388 /* XMPPDeprecatedDigestAuthentication.m */; };
 		035B5B9916A364000098CB09 /* XMPPDeprecatedPlainAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366C2169D26B300986388 /* XMPPDeprecatedPlainAuthentication.m */; };
 		035B5B9A16A364000098CB09 /* XMPPDigestMD5Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 039366C5169D26B300986388 /* XMPPDigestMD5Authentication.m */; };
@@ -901,6 +901,7 @@
 				035B5B9116A363C90098CB09 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0393669E169D25D100986388 /* Build configuration list for PBXProject "XMPPFramework" */ = {
 			isa = XCConfigurationList;
