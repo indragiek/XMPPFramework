@@ -18,23 +18,14 @@ static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/x
 @end
 
 @implementation XMPPMessage (XEP_0071)
-- (NSAttributedString *)attributedBody
+- (NSString *)HTMLBody
 {
 	NSXMLElement *html = [self elementForName:XMPPMessageElementHTML xmlns:XMPPMessageElementNSHTML];
 	NSXMLElement *body = [html elementForName:XMPPMessageElementBody xmlns:XMPPMessageElementNSBody];
-	if (body) {
-		NSString *HTMLString = [body XMLString];
-		NSStringEncoding encoding = [HTMLString fastestEncoding];
-		NSData *data = [HTMLString dataUsingEncoding:encoding];
-		if (data)
-			return [[NSAttributedString alloc] initWithHTML:data
-													options:@{NSCharacterEncodingDocumentAttribute : @(encoding)}
-										 documentAttributes:NULL];
-	}
-	return nil;
+	return [body XMLString];
 }
 
-- (void)setAttributedBody:(NSAttributedString *)attributedBody
+- (void)setHTMLBodyWithAttributedString:(NSAttributedString *)attributedBody
 {
 	NSXMLElement *html = [self elementForName:XMPPMessageElementHTML xmlns:XMPPMessageElementNSHTML];
 	if (!html) {

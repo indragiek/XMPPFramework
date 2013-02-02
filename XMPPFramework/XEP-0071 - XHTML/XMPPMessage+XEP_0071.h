@@ -25,5 +25,6 @@
 */
 
 @interface XMPPMessage (XEP_0071)
-@property (nonatomic, retain) NSAttributedString *attributedBody;
+- (void)setHTMLBodyWithAttributedString:(NSAttributedString *)attributedBody;
+@property (nonatomic, strong, readonly) NSString *HTMLBody;
 @end
