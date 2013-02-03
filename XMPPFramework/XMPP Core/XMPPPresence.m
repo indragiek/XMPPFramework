@@ -195,6 +195,7 @@
 
 - (void)setFrom:(XMPPJID *)from
 {
+	if (!from) return;
 	[self removeAttributeForName:@"from"];
 	[self addAttributeWithName:@"from" stringValue:[from description]];
 }
@@ -209,6 +210,7 @@
 
 - (void)setTo:(XMPPJID *)to
 {
+	if (!to) return;
 	[self removeAttributeForName:@"to"];
 	[self addAttributeWithName:@"to" stringValue:[to description]];
 }
