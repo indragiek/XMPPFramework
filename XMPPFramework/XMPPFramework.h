@@ -18,3 +18,4 @@
 #import <XMPPFramework/XMPPRosterMemoryStorage.h>
 #import <XMPPFramework/XMPPCapabilities.h>
 #import <XMPPFramework/XMPPCapabilitiesCoreDataStorage.h>
+#import <XMPPFramework/XMPPSoftwareVersion.h>

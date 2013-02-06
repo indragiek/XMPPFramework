@@ -127,7 +127,7 @@
 		035B5C0216A365830098CB09 /* XMPPPresence.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936732169D26B400986388 /* XMPPPresence.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		035B5C0316A365830098CB09 /* XMPPSRVResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936734169D26B400986388 /* XMPPSRVResolver.h */; };
 		035B5C0416A365830098CB09 /* XMPPStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936736169D26B400986388 /* XMPPStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 038C016E16C18EB700DC2924 /* XMPPSoftwareVersion.h */; };
+		038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 038C016E16C18EB700DC2924 /* XMPPSoftwareVersion.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		038C017116C18EB700DC2924 /* XMPPSoftwareVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 038C016F16C18EB700DC2924 /* XMPPSoftwareVersion.m */; };
 		038D5DCC16C15C5A001593F1 /* XMPPCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 038D5DC916C15C5A001593F1 /* XMPPCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		038D5DCD16C15C5A001593F1 /* XMPPCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 038D5DCA16C15C5A001593F1 /* XMPPCoreDataStorage.m */; };

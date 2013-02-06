@@ -8,7 +8,7 @@
 
 #import "XMPPSoftwareVersion.h"
 
-static NSString* const XMLNSSoftwareVersion = @"jabber:iq:version";
+NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 
 @implementation XMPPSoftwareVersion {
 	NSString *_applicationName;
@@ -19,7 +19,7 @@ static NSString* const XMLNSSoftwareVersion = @"jabber:iq:version";
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNSSoftwareVersion];
+	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNSJabberIQVersion];
 	if (!query) return NO;
 	NSString *type = [[query attributeStringValueForName:@"type"] lowercaseString];
 	if ([type isEqualToString:@"get"]) {
@@ -33,6 +33,21 @@ static NSString* const XMLNSSoftwareVersion = @"jabber:iq:version";
 {
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNSJabberIQVersion];
+	if ([self.applicationName length]) {
+		NSXMLElement *name = [NSXMLElement elementWithName:@"name" stringValue:self.applicationName];
+		[query addChild:name];
+	}
+	if ([self.applicationVersion length]) {
+		NSXMLElement *version = [NSXMLElement elementWithName:@"version" stringValue:self.applicationVersion];
+		[query addChild:version];
+	}
+	NSString *osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
+	NSString *operatingSystem = [NSString stringWithFormat:@"Mac OS X %@", osVersion];
+	NSXMLElement *os = [NSXMLElement elementWithName:@"os" stringValue:operatingSystem];
+	[query addChild:os];
+	XMPPIQ *response = [XMPPIQ iqWithType:@"result" to:iq.from elementID:iq.elementID child:query];
+	[xmppStream sendElement:response];
 }
 
 #pragma mark - Accessors

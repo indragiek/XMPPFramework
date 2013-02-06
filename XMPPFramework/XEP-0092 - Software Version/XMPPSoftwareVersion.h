@@ -8,8 +8,10 @@
 
 #import <XMPPFramework/XMPPFramework.h>
 
+extern NSString* const XMLNSJabberIQVersion;
+
 /* 
- * Module that handles queries for jabber:iq:version
+ * XEP-0092 implementation that handles queries for jabber:iq:version
  * and returns software and operating system version information
  */
 @interface XMPPSoftwareVersion : XMPPModule
