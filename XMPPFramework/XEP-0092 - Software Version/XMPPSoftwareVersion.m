@@ -17,6 +17,9 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 
 #pragma mark - XMPPStream
 
+/*
+ * Check for incoming requests for jabber:iq:version and respond to them
+ */
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNSJabberIQVersion];
@@ -29,6 +32,9 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 	return NO;
 }
 
+/*
+ Sends an IQ result stanza containing application and operating system version information
+ */
 - (void)handleSoftwareVersionRequest:(XMPPIQ *)iq
 {
 	// This method must be invoked on the moduleQueue

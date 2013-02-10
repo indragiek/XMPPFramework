@@ -127,6 +127,8 @@
 		035B5C0216A365830098CB09 /* XMPPPresence.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936732169D26B400986388 /* XMPPPresence.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		035B5C0316A365830098CB09 /* XMPPSRVResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936734169D26B400986388 /* XMPPSRVResolver.h */; };
 		035B5C0416A365830098CB09 /* XMPPStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936736169D26B400986388 /* XMPPStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0375AD0516C213530029EFF1 /* XMPPSIFileTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0375AD0316C213530029EFF1 /* XMPPSIFileTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0375AD0616C213530029EFF1 /* XMPPSIFileTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0375AD0416C213530029EFF1 /* XMPPSIFileTransfer.m */; };
 		038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 038C016E16C18EB700DC2924 /* XMPPSoftwareVersion.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		038C017116C18EB700DC2924 /* XMPPSoftwareVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = 038C016F16C18EB700DC2924 /* XMPPSoftwareVersion.m */; };
 		038D5DCC16C15C5A001593F1 /* XMPPCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 038D5DC916C15C5A001593F1 /* XMPPCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -147,6 +149,8 @@
 		035B5B8316A363C90098CB09 /* XMPPFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XMPPFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		035B5BC416A364470098CB09 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		035B5BC716A3644D0098CB09 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		0375AD0316C213530029EFF1 /* XMPPSIFileTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSIFileTransfer.h; path = "XEP-0096 - SI File Transfer/XMPPSIFileTransfer.h"; sourceTree = "<group>"; };
+		0375AD0416C213530029EFF1 /* XMPPSIFileTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSIFileTransfer.m; path = "XEP-0096 - SI File Transfer/XMPPSIFileTransfer.m"; sourceTree = "<group>"; };
 		038C016E16C18EB700DC2924 /* XMPPSoftwareVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSoftwareVersion.h; path = "XEP-0092 - Software Version/XMPPSoftwareVersion.h"; sourceTree = "<group>"; };
 		038C016F16C18EB700DC2924 /* XMPPSoftwareVersion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSoftwareVersion.m; path = "XEP-0092 - Software Version/XMPPSoftwareVersion.m"; sourceTree = "<group>"; };
 		038D5DC916C15C5A001593F1 /* XMPPCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCoreDataStorage.h; sourceTree = "<group>"; };
@@ -322,6 +326,15 @@
 			path = "Core Data";
 			sourceTree = "<group>";
 		};
+		0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */ = {
+			isa = PBXGroup;
+			children = (
+				0375AD0316C213530029EFF1 /* XMPPSIFileTransfer.h */,
+				0375AD0416C213530029EFF1 /* XMPPSIFileTransfer.m */,
+			);
+			name = "XEP-0096 - SI File Transfer";
+			sourceTree = "<group>";
+		};
 		038C016D16C18E8500DC2924 /* XEP-0092 - Software Version */ = {
 			isa = PBXGroup;
 			children = (
@@ -392,6 +405,7 @@
 				03936715169D26B400986388 /* XEP-0153 - Avatars */,
 				03936718169D26B400986388 /* XEP-0199 - Ping */,
 				0393671D169D26B400986388 /* XEP-0203 - Delay */,
+				0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */,
 				03936720169D26B400986388 /* XMPP Core */,
 				039366AE169D25D100986388 /* Supporting Files */,
 			);
@@ -740,6 +754,7 @@
 				038D5DCC16C15C5A001593F1 /* XMPPCoreDataStorage.h in Headers */,
 				038D5DCE16C15C5A001593F1 /* XMPPCoreDataStorageProtected.h in Headers */,
 				038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */,
+				0375AD0516C213530029EFF1 /* XMPPSIFileTransfer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -859,6 +874,7 @@
 				032D586B16C158A1009577E1 /* XMPPCapabilities.m in Sources */,
 				038D5DCD16C15C5A001593F1 /* XMPPCoreDataStorage.m in Sources */,
 				038C017116C18EB700DC2924 /* XMPPSoftwareVersion.m in Sources */,
+				0375AD0616C213530029EFF1 /* XMPPSIFileTransfer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

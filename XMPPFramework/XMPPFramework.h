@@ -19,3 +19,4 @@
 #import <XMPPFramework/XMPPCapabilities.h>
 #import <XMPPFramework/XMPPCapabilitiesCoreDataStorage.h>
 #import <XMPPFramework/XMPPSoftwareVersion.h>
+#import <XMPPFramework/XMPPSIFileTransfer.h>

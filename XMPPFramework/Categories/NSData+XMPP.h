@@ -3,6 +3,7 @@
 @interface NSData (XMPP)
 
 - (NSData *)md5Digest;
+- (NSString *)md5String;
 
 - (NSData *)sha1Digest;
 

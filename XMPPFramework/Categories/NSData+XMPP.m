@@ -23,6 +23,16 @@ static char encodingTable[64] = {
     return [NSData dataWithBytes:result length:CC_MD5_DIGEST_LENGTH];
 }
 
+- (NSString *)md5String
+{
+	unsigned char result[CC_MD5_DIGEST_LENGTH];
+	CC_MD5([self bytes], (CC_LONG)[self length], result);
+	NSMutableString *output = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+	for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i++)
+		[output appendFormat:@"%02x", result[i]];
+	return output;
+}
+
 - (NSData *)sha1Digest
 {
 	unsigned char result[CC_SHA1_DIGEST_LENGTH];
