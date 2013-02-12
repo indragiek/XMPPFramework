@@ -233,7 +233,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		}
 		// Received a stream initiation result
 		if ([iq.type isEqualToString:@"result"] && iq.elementID) {
-			if (iq.elementID) {
+			if (iq.elementID && _outgoingTransfers[iq.elementID]) {
 				[self handleStreamInitiationResult:iq];
 				return YES;
 			}

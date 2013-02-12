@@ -12,6 +12,8 @@
  * Implementation of XEP-0047, which enables two entities to establish 
  * a virtual bytestream over which they can exchange Base64-encoded chunks 
  * of data over XMPP itself
+ *
+ * This implementation currently does NOT support bidirectional transfer.
  */
 @interface XMPPInBandBytestream : XMPPModule
 
