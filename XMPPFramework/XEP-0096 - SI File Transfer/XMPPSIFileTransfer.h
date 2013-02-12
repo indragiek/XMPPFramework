@@ -129,10 +129,6 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  */
 @property (nonatomic, copy, readonly) NSString *streamMethod;
 /*
- * Socket that is used for SOCKS5 bytestreams. Returns nil if the SOCKS5 transfer mechanism is not being used
- */
-@property (nonatomic, strong, readonly) TURNSocket *socket;
-/*
  * The remote JID that the transfer is with
  */
 @property (nonatomic, strong, readonly) XMPPJID *remoteJID;

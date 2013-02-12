@@ -43,6 +43,11 @@
 - (id)initIncomingBytestreamRequest:(XMPPIQ *)iq;
 
 /*
+ * Start the transfer 
+ */
+- (void)start;
+
+/*
  * The data sent or received. If this transfer is incoming, this property will be nil
  * until the transfer has completed
  */

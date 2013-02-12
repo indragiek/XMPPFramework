@@ -40,9 +40,6 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 		_sid = _elementID;
 		_byteOffset = 0;
 		_outgoing = YES;
-		dispatch_async(moduleQueue, ^{
-			[self sendOpenIQ];
-		});
 	}
 	return self;
 }
@@ -68,11 +65,23 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 		// being an officially documented method, seems like abuse of the protocol. It should
 		// seriously be removed from the XEP-0047 spec, considering that there is no reason
 		// why a client can use message stanzas but not IQ stanzas to transfer information.
-		dispatch_async(moduleQueue, ^{
-			[self sendAcceptIQ];
-		});
 	}
 	return self;
+}
+
+- (void)start
+{
+	dispatch_block_t block = ^{
+		if (self.outgoing) {
+			[self sendOpenIQ];
+		} else {
+			[self sendAcceptIQ];
+		}
+	};
+	if (dispatch_get_current_queue() == moduleQueue)
+		block();
+	else
+		dispatch_async(moduleQueue, block);
 }
 
 #pragma mark - XMPPStreamDelegate
