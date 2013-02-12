@@ -13,7 +13,7 @@ static NSString* const XMLNSProtocolIBB = @"http://jabber.org/protocol/ibb";
 static NSUInteger const XMPPIBBMinimumBlockSize = 4096;
 static NSUInteger const XMPPIBBMaximumBlockSize = 65535;
 
-static NSString* const XMPPIBErrorDomain = @"XMPPInBandBytestreamErrorDomain";
+static NSString* const XMPPIBBErrorDomain = @"XMPPInBandBytestreamErrorDomain";
 
 static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 	return MAX(MIN(size, XMPPIBBMaximumBlockSize), XMPPIBBMinimumBlockSize);
@@ -107,17 +107,17 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 
 + (NSError *)serviceUnavailableError
 {
-	return [NSError errorWithDomain:XMPPIBErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"The receiver does not support in band bytestreams."}];
+	return [NSError errorWithDomain:XMPPIBBErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"The receiver does not support in band bytestreams."}];
 }
 
 + (NSError *)notAcceptableError
 {
-	return [NSError errorWithDomain:XMPPIBErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"The receiver has rejected the transfer."}];
+	return [NSError errorWithDomain:XMPPIBBErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"The receiver has rejected the transfer."}];
 }
 
 + (NSError *)resourceConstraintError
 {
-	return [NSError errorWithDomain:XMPPIBErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"The receiver has requested a block size that is too small."}];
+	return [NSError errorWithDomain:XMPPIBBErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"The receiver has requested a block size that is too small."}];
 }
 
 #pragma mark - Private
@@ -156,7 +156,7 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 	dispatch_once(&onceToken, ^{
 		[multicastDelegate xmppIBBTransferDidBegin:self];
 	});
-	NSXMLElement *data = [iq elementForName:@"data" xmlns:XMPPIBErrorDomain];
+	NSXMLElement *data = [iq elementForName:@"data" xmlns:XMLNSProtocolIBB];
 	NSString *base64String = data.stringValue;
 	if ([base64String length]) {
 		NSData *base64Data = [base64String dataUsingEncoding:NSASCIIStringEncoding];
