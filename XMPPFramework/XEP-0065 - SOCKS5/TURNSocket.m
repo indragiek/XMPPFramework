@@ -213,7 +213,7 @@ static NSMutableArray *proxyCandidates;
  * Initializes a new TURN socket to create a TCP connection by routing through a proxy.
  * This constructor configures the object to be the client connecting to a server.
 **/
-- (id)initWithStream:(XMPPStream *)stream toJID:(XMPPJID *)aJid
+- (id)initWithStream:(XMPPStream *)stream toJID:(XMPPJID *)aJid elementID:(NSString *)elementID
 {
 	if ((self = [super init]))
 	{
@@ -228,7 +228,7 @@ static NSMutableArray *proxyCandidates;
 		// Relying only on JID's is troublesome, because client A could be initiating a connection to server B,
 		// while at the same time client B could be initiating a connection to server A.
 		// So an incoming connection from JID clientB@deusty.com/home would be for which turn socket?
-		uuid = [xmppStream generateUUID];
+		uuid = [elementID copy];
 		
 		// Setup initial state for a client connection
 		state = STATE_INIT;

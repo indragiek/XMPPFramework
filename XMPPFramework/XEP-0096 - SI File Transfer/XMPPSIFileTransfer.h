@@ -115,7 +115,7 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 /*
  * Called to inform the delegate of the progress of the file transfer operation. The totalBytes
  * and transferredBytes properties of XMPPTransfer (which are also KVO observable) can be used
- * to determine the percentage completion of the transfer)
+ * to determine the percentage completion of the transfer).
  */
 - (void)xmppSIFileTransferUpdatedProgress:(XMPPTransfer *)transfer;
 @end

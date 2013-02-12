@@ -125,7 +125,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[feature addChild:x];
 		[si addChild:feature];
 		
-		NSString *identifier = [[NSUUID UUID] UUIDString];
+		NSString *identifier = [xmppStream generateUUID];
 		XMPPIQ *offer = [XMPPIQ iqWithType:@"set" to:jid elementID:identifier child:si];
 		[xmppStream sendElement:offer];
 		
@@ -246,7 +246,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)xmppTransfer:(XMPPTransfer *)transfer failedWithError:(NSError *)error
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self transferFailed:transfer error:error];
 }
 
@@ -262,7 +262,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)xmppTransferDidEnd:(XMPPTransfer *)transfer
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self removeTransfer:transfer];
 	[multicastDelegate xmppSIFileTransferDidEnd:transfer];
 }
@@ -271,7 +271,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)removeTransfer:(XMPPTransfer *)transfer
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	if (!transfer.uniqueIdentifier) return;
 	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 	[_incomingTransfers removeObjectForKey:transfer.uniqueIdentifier];
@@ -279,20 +279,20 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)transferFailed:(XMPPTransfer *)transfer error:(NSError *)error
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self removeTransfer:transfer];
 	[multicastDelegate xmppSIFileTransferFailed:transfer withError:error];
 }
 
 - (void)transferDidBegin:(XMPPTransfer *)transfer
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
 }
 
 - (void)beginOutgoingTransfer:(XMPPTransfer *)transfer
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	if ([transfer.streamMethod isEqualToString:XMPPSIProfileSOCKS5Transfer]) {
 		[self beginSOCKS5OutgoingTransfer:transfer];
 	} else if ([transfer.streamMethod isEqualToString:XMPPSIProfileIBBTransfer]) {
@@ -302,8 +302,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)beginSOCKS5OutgoingTransfer:(XMPPTransfer *)transfer
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
-	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream toJID:transfer.remoteJID];
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream toJID:transfer.remoteJID elementID:transfer.uniqueIdentifier];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
 	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
@@ -311,12 +311,12 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)beginIBBOutgoingTransfer:(XMPPTransfer *)transfer
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 }
 
 - (void)handleStreamInitiationResult:(XMPPIQ *)iq
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *si = [iq elementForName:@"si" xmlns:XMLNSJabberSI];
 	XMPPTransfer *transfer = _outgoingTransfers[iq.elementID];
 	if (transfer) {
@@ -351,7 +351,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)handleStreamInitiationOffer:(XMPPIQ *)iq
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *si = [iq elementForName:@"si" xmlns:XMLNSJabberSI];
 	if ([[si attributeStringValueForName:@"profile"] isEqualToString:XMLNSJabberSIFileTransfer]) {
 		// Check for valid file name and file size
@@ -379,7 +379,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)sendProfileNotUnderstoodErrorForIQ:(XMPPIQ *)iq
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *error = [self.class badRequestErrorElement];
 	NSXMLElement *badProfile = [NSXMLElement elementWithName:@"bad-profile" xmlns:XMLNSJabberSI];
 	[error addChild:badProfile];
@@ -389,7 +389,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)sendNoValidStreamsErrorForIQ:(XMPPIQ *)iq
 {
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *error = [self.class badRequestErrorElement];
 	NSXMLElement *noValidStreams = [NSXMLElement elementWithName:@"no-valid-streams" xmlns:XMLNSJabberSI];
 	[error addChild:noValidStreams];

@@ -127,6 +127,8 @@
 		035B5C0216A365830098CB09 /* XMPPPresence.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936732169D26B400986388 /* XMPPPresence.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		035B5C0316A365830098CB09 /* XMPPSRVResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936734169D26B400986388 /* XMPPSRVResolver.h */; };
 		035B5C0416A365830098CB09 /* XMPPStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 03936736169D26B400986388 /* XMPPStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0371704516CA05F500EDE221 /* XMPPInBandBytestream.h in Headers */ = {isa = PBXBuildFile; fileRef = 0371704316CA05F500EDE221 /* XMPPInBandBytestream.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0371704616CA05F500EDE221 /* XMPPInBandBytestream.m in Sources */ = {isa = PBXBuildFile; fileRef = 0371704416CA05F500EDE221 /* XMPPInBandBytestream.m */; };
 		0375AD0516C213530029EFF1 /* XMPPSIFileTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0375AD0316C213530029EFF1 /* XMPPSIFileTransfer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0375AD0616C213530029EFF1 /* XMPPSIFileTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0375AD0416C213530029EFF1 /* XMPPSIFileTransfer.m */; };
 		038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 038C016E16C18EB700DC2924 /* XMPPSoftwareVersion.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -151,6 +153,8 @@
 		035B5B8316A363C90098CB09 /* XMPPFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XMPPFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		035B5BC416A364470098CB09 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		035B5BC716A3644D0098CB09 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		0371704316CA05F500EDE221 /* XMPPInBandBytestream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPInBandBytestream.h; path = "XEP-0047 - In-Band Bytestream/XMPPInBandBytestream.h"; sourceTree = "<group>"; };
+		0371704416CA05F500EDE221 /* XMPPInBandBytestream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPInBandBytestream.m; path = "XEP-0047 - In-Band Bytestream/XMPPInBandBytestream.m"; sourceTree = "<group>"; };
 		0375AD0316C213530029EFF1 /* XMPPSIFileTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSIFileTransfer.h; path = "XEP-0096 - SI File Transfer/XMPPSIFileTransfer.h"; sourceTree = "<group>"; };
 		0375AD0416C213530029EFF1 /* XMPPSIFileTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPSIFileTransfer.m; path = "XEP-0096 - SI File Transfer/XMPPSIFileTransfer.m"; sourceTree = "<group>"; };
 		038C016E16C18EB700DC2924 /* XMPPSoftwareVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPSoftwareVersion.h; path = "XEP-0092 - Software Version/XMPPSoftwareVersion.h"; sourceTree = "<group>"; };
@@ -330,6 +334,15 @@
 			path = "Core Data";
 			sourceTree = "<group>";
 		};
+		0371704216CA05CA00EDE221 /* XEP-0047 - In-Band Bytestream */ = {
+			isa = PBXGroup;
+			children = (
+				0371704316CA05F500EDE221 /* XMPPInBandBytestream.h */,
+				0371704416CA05F500EDE221 /* XMPPInBandBytestream.m */,
+			);
+			name = "XEP-0047 - In-Band Bytestream";
+			sourceTree = "<group>";
+		};
 		0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */ = {
 			isa = PBXGroup;
 			children = (
@@ -411,6 +424,7 @@
 				0393671D169D26B400986388 /* XEP-0203 - Delay */,
 				0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */,
 				03B9E8EE16C8B4B0002F2730 /* XEP-0065 - SOCKS5 */,
+				0371704216CA05CA00EDE221 /* XEP-0047 - In-Band Bytestream */,
 				03936720169D26B400986388 /* XMPP Core */,
 				039366AE169D25D100986388 /* Supporting Files */,
 			);
@@ -771,6 +785,7 @@
 				038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */,
 				0375AD0516C213530029EFF1 /* XMPPSIFileTransfer.h in Headers */,
 				03B9E8F116C8B4C2002F2730 /* TURNSocket.h in Headers */,
+				0371704516CA05F500EDE221 /* XMPPInBandBytestream.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -892,6 +907,7 @@
 				038C017116C18EB700DC2924 /* XMPPSoftwareVersion.m in Sources */,
 				0375AD0616C213530029EFF1 /* XMPPSIFileTransfer.m in Sources */,
 				03B9E8F216C8B4C2002F2730 /* TURNSocket.m in Sources */,
+				0371704616CA05F500EDE221 /* XMPPInBandBytestream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

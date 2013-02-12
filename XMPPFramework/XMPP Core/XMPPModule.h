@@ -37,3 +37,8 @@
 - (NSString *)moduleName;
 
 @end
+
+/*
+ * Handy macro for asserting whether code is running on the module queue
+ */
+#define XMPP_MODULE_ASSERT_CORRECT_QUEUE() NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");

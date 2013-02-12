@@ -20,3 +20,5 @@
 #import <XMPPFramework/XMPPCapabilitiesCoreDataStorage.h>
 #import <XMPPFramework/XMPPSoftwareVersion.h>
 #import <XMPPFramework/XMPPSIFileTransfer.h>
+#import <XMPPFramework/TURNSocket.h>
+#import <XMPPFramework/XMPPInBandBytestream.h>

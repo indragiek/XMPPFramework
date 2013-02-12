@@ -53,8 +53,8 @@
 + (NSArray *)proxyCandidates;
 + (void)setProxyCandidates:(NSArray *)candidates;
 
-- (id)initWithStream:(XMPPStream *)xmppStream toJID:(XMPPJID *)jid;
-- (id)initWithStream:(XMPPStream *)xmppStream incomingTURNRequest:(XMPPIQ *)iq;
+- (id)initWithStream:(XMPPStream *)stream toJID:(XMPPJID *)aJid elementID:(NSString *)elementID;
+- (id)initWithStream:(XMPPStream *)stream incomingTURNRequest:(XMPPIQ *)iq;
 
 - (void)startWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)aDelegateQueue;
 
