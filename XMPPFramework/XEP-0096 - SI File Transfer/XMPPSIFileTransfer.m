@@ -10,6 +10,7 @@
 #import "NSDate+XMPPDateTimeProfiles.h"
 #import "NSData+XMPP.h"
 #import "TURNSocket.h"
+#import "XMPPInBandBytestream.h"
 
 NSString* const XMLNSJabberSI = @"http://jabber.org/protocol/si";
 NSString* const XMLNSJabberSIFileTransfer = @"http://jabber.org/protocol/si/profile/file-transfer";
@@ -25,10 +26,9 @@ static NSString* const XMPPSIFileTransferErrorDomain = @"XMPPSIFileTransferError
 static NSArray *_supportedTransferMechanisms = nil;
 
 @protocol XMPPTransferDelegate;
-@interface XMPPTransfer ()
+@interface XMPPTransfer () <GCDAsyncSocketDelegate, TURNSocketDelegate, XMPPInBandBytestreamDelegate>
 @property (nonatomic, strong, readwrite) XMPPJID *remoteJID;
 @property (nonatomic, copy, readwrite) NSString *streamMethod;
-@property (nonatomic, strong, readwrite) TURNSocket *socket;
 @property (nonatomic, strong, readwrite) NSData *data;
 @property (nonatomic, assign, readwrite) NSRange dataRange;
 @property (nonatomic, assign, readwrite) unsigned long long totalBytes;
@@ -40,6 +40,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 @property (nonatomic, copy, readwrite) NSString *MD5Hash;
 @property (nonatomic, copy, readwrite) NSString *uniqueIdentifier;
 
+@property (nonatomic, strong, readwrite) TURNSocket *socket;
+@property (nonatomic, strong) XMPPInBandBytestream *inBandBytestream;
 @property (nonatomic, weak) id<XMPPTransferDelegate> delegate;
 @end
 
@@ -306,12 +308,15 @@ static NSArray *_supportedTransferMechanisms = nil;
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream toJID:transfer.remoteJID elementID:transfer.uniqueIdentifier];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
-	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
 }
 
 - (void)beginIBBOutgoingTransfer:(XMPPTransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initOutgoingBytestreamToJID:transfer.remoteJID elementID:transfer.uniqueIdentifier data:transfer.data];
+	transfer.inBandBytestream = bytestream;
+	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
+	[bytestream start];
 }
 
 - (void)handleStreamInitiationResult:(XMPPIQ *)iq
@@ -491,6 +496,33 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
 	self.data = data;
+	[self.delegate xmppTransferDidEnd:self];
+}
+
+#pragma mark -XMPPInBandBytestreamDelegate
+
+- (void)xmppIBBTransferDidBegin:(XMPPInBandBytestream *)stream
+{
+	[self.delegate xmppTransferDidBegin:self];
+}
+
+- (void)xmppIBBTransfer:(XMPPInBandBytestream *)stream didWriteDataOfLength:(NSUInteger)length
+{
+	[self incrementTransferredBytesBy:length];
+}
+
+- (void)xmppIBBTransfer:(XMPPInBandBytestream *)stream didReadDataOfLength:(NSUInteger)length
+{
+	[self incrementTransferredBytesBy:length];
+}
+
+- (void)xmppIBBTransfer:(XMPPInBandBytestream *)stream failedWithError:(NSError *)error
+{
+	[self.delegate xmppTransfer:self failedWithError:error];
+}
+
+- (void)xmppIBBTransferDidEnd:(XMPPInBandBytestream *)stream
+{
 	[self.delegate xmppTransferDidEnd:self];
 }
 

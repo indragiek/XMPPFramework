@@ -75,6 +75,7 @@
 @end
 
 @protocol XMPPInBandBytestreamDelegate <NSObject>
+@optional
 /*
  * Called when the transfer begins.
  */

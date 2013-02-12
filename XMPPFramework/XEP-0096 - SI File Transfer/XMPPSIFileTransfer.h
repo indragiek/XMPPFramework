@@ -7,7 +7,6 @@
 //
 
 #import "XMPP.h"
-#import "TURNSocket.h"
 
 extern NSString* const XMLNSJabberSI; // @"http://jabber.org/protocol/si"
 extern NSString* const XMLNSJabberSIFileTransfer; // @"http://jabber.org/protocol/si/profile/file-transfer"
@@ -86,6 +85,7 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 @end
 
 @protocol XMPPSIFileTransferDelegate <NSObject>
+@optional
 /*
  * Called when another XMPP entity sends a stream initiation offer
  */
@@ -123,7 +123,7 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 /*
  * Class that represents an XMPP file transfer via XMPPSIFileTransfer
  */
-@interface XMPPTransfer : NSObject <GCDAsyncSocketDelegate, TURNSocketDelegate>
+@interface XMPPTransfer : NSObject
 /*
  * The stream transfer method being used to transfer the file
  */
