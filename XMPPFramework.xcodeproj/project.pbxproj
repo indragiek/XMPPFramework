@@ -134,6 +134,8 @@
 		038D5DCC16C15C5A001593F1 /* XMPPCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 038D5DC916C15C5A001593F1 /* XMPPCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		038D5DCD16C15C5A001593F1 /* XMPPCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 038D5DCA16C15C5A001593F1 /* XMPPCoreDataStorage.m */; };
 		038D5DCE16C15C5A001593F1 /* XMPPCoreDataStorageProtected.h in Headers */ = {isa = PBXBuildFile; fileRef = 038D5DCB16C15C5A001593F1 /* XMPPCoreDataStorageProtected.h */; };
+		03B9E8F116C8B4C2002F2730 /* TURNSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 03B9E8EF16C8B4C2002F2730 /* TURNSocket.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		03B9E8F216C8B4C2002F2730 /* TURNSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 03B9E8F016C8B4C2002F2730 /* TURNSocket.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -273,6 +275,8 @@
 		039367F3169D2C8C00986388 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		03936804169D2CE800986388 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		03936806169D2D2700986388 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		03B9E8EF16C8B4C2002F2730 /* TURNSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TURNSocket.h; path = "XMPPFramework/XEP-0065 - SOCKS5/TURNSocket.h"; sourceTree = SOURCE_ROOT; };
+		03B9E8F016C8B4C2002F2730 /* TURNSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TURNSocket.m; path = "XMPPFramework/XEP-0065 - SOCKS5/TURNSocket.m"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -406,6 +410,7 @@
 				03936718169D26B400986388 /* XEP-0199 - Ping */,
 				0393671D169D26B400986388 /* XEP-0203 - Delay */,
 				0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */,
+				03B9E8EE16C8B4B0002F2730 /* XEP-0065 - SOCKS5 */,
 				03936720169D26B400986388 /* XMPP Core */,
 				039366AE169D25D100986388 /* Supporting Files */,
 			);
@@ -682,6 +687,16 @@
 			name = CocoaLumberjack;
 			sourceTree = "<group>";
 		};
+		03B9E8EE16C8B4B0002F2730 /* XEP-0065 - SOCKS5 */ = {
+			isa = PBXGroup;
+			children = (
+				03B9E8EF16C8B4C2002F2730 /* TURNSocket.h */,
+				03B9E8F016C8B4C2002F2730 /* TURNSocket.m */,
+			);
+			name = "XEP-0065 - SOCKS5";
+			path = ..;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -755,6 +770,7 @@
 				038D5DCE16C15C5A001593F1 /* XMPPCoreDataStorageProtected.h in Headers */,
 				038C017016C18EB700DC2924 /* XMPPSoftwareVersion.h in Headers */,
 				0375AD0516C213530029EFF1 /* XMPPSIFileTransfer.h in Headers */,
+				03B9E8F116C8B4C2002F2730 /* TURNSocket.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -875,6 +891,7 @@
 				038D5DCD16C15C5A001593F1 /* XMPPCoreDataStorage.m in Sources */,
 				038C017116C18EB700DC2924 /* XMPPSoftwareVersion.m in Sources */,
 				0375AD0616C213530029EFF1 /* XMPPSIFileTransfer.m in Sources */,
+				03B9E8F216C8B4C2002F2730 /* TURNSocket.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,7 +6,8 @@
 //  Copyright (c) 2013 nonatomic. All rights reserved.
 //
 
-#import <XMPPFramework/XMPPFramework.h>
+#import "XMPP.h"
+#import "TURNSocket.h"
 
 extern NSString* const XMLNSJabberSI; // @"http://jabber.org/protocol/si"
 extern NSString* const XMLNSJabberSIFileTransfer; // @"http://jabber.org/protocol/si/profile/file-transfer"
@@ -14,6 +15,7 @@ extern NSString* const XMLNSJabberSIFileTransfer; // @"http://jabber.org/protoco
 extern NSString* const XMPPSIProfileSOCKS5Transfer; // @"http://jabber.org/protocol/bytestreams"
 extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol/ibb"
 
+@class XMPPTransfer;
 /*
  * Implementation of XEP-0095 Stream Initiation for initiating a data stream between
  * two XMPP entities, and XEP-0096, which uses stream initiation for the purpose of
@@ -39,32 +41,29 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  *		http://jabber.org/protocol/ibb - In Band Bytestream (XEP-0047)
  * supportsRangedTransfer - Whether the receiver can request a specific range of the file
  * jid - The target JID to send the offer to
+ * 
+ * Returns an XMPPTransfer object representing this stream initiation offer.
  */
-- (void)sendStreamInitiationOfferForFileName:(NSString *)name
-										size:(NSUInteger)size
-								 description:(NSString *)description
-									mimeType:(NSString *)mimeType
-										hash:(NSString *)hash
-							lastModifiedDate:(NSDate *)date
-							   streamMethods:(NSArray *)methods
-					  supportsRangedTransfer:(BOOL)supportsRanged
-									   toJID:(XMPPJID *)jid;
+- (XMPPTransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
+												  data:(NSData *)data
+										   description:(NSString *)description
+											  mimeType:(NSString *)mimeType
+									  lastModifiedDate:(NSDate *)date
+										 streamMethods:(NSArray *)methods
+								supportsRangedTransfer:(BOOL)supportsRanged
+												 toJID:(XMPPJID *)jid;
 
 /*
  * Convenience method for sending a stream initiation offer for the most common use case
  * Fills in the hash & size automatically, and passes the default stream methods supported by 
  * this class (XMPPSIProfileSOCKS5Transfer and XMPPSIProfileIBBTransfer) and YES for supportsRangedTransfer
+ *
+ * Returns an XMPPTransfer object representing this stream initiation offer.
  */
-- (void)sendStreamInitiationOfferForFileName:(NSString *)name
-										data:(NSData *)data
-									mimeType:(NSString *)mimeType
-									   toJID:(XMPPJID *)jid;
-
-
-/*
- Begins the data transfer for an XMPP entity that has accepted a sent stream initiation offer
- */
-- (void)beginTransferForStreamInitiationResult:(XMPPIQ *)result data:(NSData *)data;
+- (XMPPTransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
+												  data:(NSData *)data
+											  mimeType:(NSString *)mimeType
+												 toJID:(XMPPJID *)jid;
 
 #pragma mark - Receiving
 
@@ -95,10 +94,88 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 /*
  * Called when the XMPP stream has successfully sent a stream initiation offer
  */
-- (void)xmppSIFileTransferDidSendOffer:(XMPPIQ *)offer;
+- (void)xmppSIFileTransferDidSendOfferForTransfer:(XMPPTransfer *)transfer;
 
 /*
- * Called when the remote XMPP entity accepts your stream initiation offer
+ * Called when either an outgoing or incoming file transfer begins
  */
-- (void)xmppSIFileTransferStreamInitiationOffer:(XMPPIQ *)offer acceptedWithResult:(XMPPIQ *)result;
+- (void)xmppSIFileTransferDidBegin:(XMPPTransfer *)transfer;
+
+/*
+ * Called when a file transfer completes. (If this is an incoming transfer, this means
+ * that you can now access the data property to retrieve the downloaded file data).
+ */
+- (void)xmppSIFileTransferDidEnd:(XMPPTransfer *)transfer;
+
+/*
+ * Called when the specified file transfer fails with error information if available
+ */
+- (void)xmppSIFileTransferFailed:(XMPPTransfer *)transfer withError:(NSError *)error;
+
+/*
+ * Called to inform the delegate of the progress of the file transfer operation. The totalBytes
+ * and transferredBytes properties of XMPPTransfer (which are also KVO observable) can be used
+ * to determine the percentage completion of the transfer)
+ */
+- (void)xmppSIFileTransferUpdatedProgress:(XMPPTransfer *)transfer;
+@end
+
+/*
+ * Class that represents an XMPP file transfer via XMPPSIFileTransfer
+ */
+@interface XMPPTransfer : NSObject <GCDAsyncSocketDelegate, TURNSocketDelegate>
+/*
+ * The stream transfer method being used to transfer the file
+ */
+@property (nonatomic, copy, readonly) NSString *streamMethod;
+/*
+ * Socket that is used for SOCKS5 bytestreams. Returns nil if the SOCKS5 transfer mechanism is not being used
+ */
+@property (nonatomic, strong, readonly) TURNSocket *socket;
+/*
+ * The remote JID that the transfer is with
+ */
+@property (nonatomic, strong, readonly) XMPPJID *remoteJID;
+/*
+ * The data being transferred (either written or received). 
+ * If this is an incoming transfer, data will be nil until the transfer has completed
+ */
+@property (nonatomic, strong, readonly) NSData *data;
+/*
+ * The range of the data being transferred. Returns NSZeroRange if all of the data is being transferred.
+ */
+@property (nonatomic, assign, readonly) NSRange dataRange;
+/*
+ * The total number of bytes to transfer. KVO observable.
+ */
+@property (nonatomic, assign, readonly) unsigned long long totalBytes;
+/*
+ * The number of bytes already transferred. KVO observable.
+ */
+@property (nonatomic, assign, readonly) unsigned long long transferredBytes;
+/*
+ * YES if the transfer is an outgoing transfer, NO if the transfer is an incoming transfer
+ */
+@property (nonatomic, assign, readonly) BOOL outgoing;
+/*
+ * The name of the file being transferred
+ */
+@property (nonatomic, copy, readonly) NSString *fileName;
+/*
+ * An optional extended description of the file being transferred
+ */
+@property (nonatomic, copy, readonly) NSString *fileDescription;
+/*
+ * The MIME type of the file being transferred
+ */
+@property (nonatomic, copy, readonly) NSString *mimeType;
+/*
+ * The MD5 hash of the file being transferred
+ */
+@property (nonatomic, copy, readonly) NSString *MD5Hash;
+/*
+ * The unique identifier for this file transfer (used as the elementID in incoming and outgoing
+ * XMPPIQ stanzas)
+ */
+@property (nonatomic, copy, readonly) NSString *uniqueIdentifier;
 @end
