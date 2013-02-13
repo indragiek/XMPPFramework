@@ -228,24 +228,29 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	if ([iq elementForName:@"si" xmlns:XMLNSJabberSI]) {
+	if ([iq.type isEqualToString:@"set"]) {
 		// Received a stream initiation offer
-		if ([iq.type isEqualToString:@"set"]) {
+		if ([iq elementForName:@"si" xmlns:XMLNSJabberSI]) {
 			[self handleStreamInitiationOffer:iq];
 			return YES;
+		// Incoming TURN request
+		} else if ([iq elementForName:@"query" xmlns:XMPPSIProfileSOCKS5Transfer]
+					&& iq.elementID
+					&& _incomingTransfers[iq.elementID]) {
+			[self handleTURNRequest:iq];
+			return YES;
+		// Incoming In-Band Bytestream Request
+		} else if ([iq elementForName:@"open" xmlns:XMPPSIProfileIBBTransfer]
+				   && iq.elementID
+				   && _incomingTransfers[iq.elementID]) {
+			[self handleIBBRequest:iq];
+			return YES;
 		}
-		// Received a stream initiation result
-		if ([iq.type isEqualToString:@"result"] && iq.elementID && _outgoingTransfers[iq.elementID]) {
+	} else if ([iq.type isEqualToString:@"result"]) {
+		if (iq.elementID && _outgoingTransfers[iq.elementID]) {
 			[self handleStreamInitiationResult:iq];
 			return YES;
 		}
-	// Incoming TURN Request
-	} else if ([iq.type isEqualToString:@"set"]
-			   && [iq elementForName:@"query" xmlns:XMPPSIProfileSOCKS5Transfer]
-			   && iq.elementID
-			   && _incomingTransfers[iq.elementID]) {
-		[self handleTURNRequest:iq];
-		return YES;
 	}
 	return NO;
 }
@@ -416,6 +421,15 @@ static NSArray *_supportedTransferMechanisms = nil;
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream incomingTURNRequest:iq];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
+}
+
+- (void)handleIBBRequest:(XMPPIQ *)iq
+{
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
+	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initIncomingBytestreamRequest:iq];
+	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
+	[bytestream start];
 }
 
 - (void)sendProfileNotUnderstoodErrorForIQ:(XMPPIQ *)iq
