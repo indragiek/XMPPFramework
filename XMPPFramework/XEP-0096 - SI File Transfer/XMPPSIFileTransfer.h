@@ -65,23 +65,15 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 												 toJID:(XMPPJID *)jid;
 
 #pragma mark - Receiving
-
-/*
- * Convenience method for extracting an array of stream method strings
- * from a received stream initiation offer IQ
- * Returns nil if the element is not of a valid structure
- */
-+ (NSArray *)extractStreamMethodsFromIQ:(XMPPIQ *)iq;
-
 /*
  Accepts the specified stream initiation offer
  */
-- (void)acceptStreamInitiationOffer:(XMPPIQ *)offer withStreamMethod:(NSString *)method;
+- (void)acceptStreamInitiationOfferForTransfer:(XMPPSITransfer *)transfer;
 
 /*
  Rejects the specified stream initiation offer
  */
-- (void)rejectStreamInitiationOffer:(XMPPIQ *)offer;
+- (void)rejectOfferForTransfer:(XMPPSITransfer *)transfer;
 @end
 
 @protocol XMPPSIFileTransferDelegate <NSObject>
@@ -89,7 +81,7 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 /*
  * Called when another XMPP entity sends a stream initiation offer for a file transfer
  */
-- (void)xmppSIFileTransferReceivedOffer:(XMPPIQ *)iq forTransfer:(XMPPSITransfer *)transfer;
+- (void)xmppSIFileTransferReceivedOfferForTransfer:(XMPPSITransfer *)transfer;
 
 /*
  * Called when the XMPP stream has successfully sent a stream initiation offer
@@ -174,4 +166,8 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  * XMPPIQ stanzas)
  */
 @property (nonatomic, copy, readonly) NSString *uniqueIdentifier;
+/*
+ * The date the file was last modified, if available
+ */
+@property (nonatomic, strong, readonly) NSDate *lastModifiedDate;
 @end

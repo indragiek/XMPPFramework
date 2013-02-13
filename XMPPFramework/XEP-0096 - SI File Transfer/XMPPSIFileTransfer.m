@@ -39,6 +39,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 @property (nonatomic, copy, readwrite) NSString *mimeType;
 @property (nonatomic, copy, readwrite) NSString *MD5Hash;
 @property (nonatomic, copy, readwrite) NSString *uniqueIdentifier;
+@property (nonatomic, strong, readwrite) NSDate *lastModifiedDate;
 
 @property (nonatomic, strong, readwrite) TURNSocket *socket;
 @property (nonatomic, strong) XMPPInBandBytestream *inBandBytestream;
@@ -166,7 +167,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 												toJID:jid];
 }
 
-- (void)acceptStreamInitiationOffer:(XMPPIQ *)offer withStreamMethod:(NSString *)method
+- (void)acceptStreamInitiationOfferForTransfer:(XMPPSITransfer *)transfer
 {
 	dispatch_block_t block = ^{
 		NSXMLElement *si = [NSXMLElement elementWithName:@"si" xmlns:XMLNSJabberSI];
@@ -177,13 +178,14 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[x addAttributeWithName:@"type" stringValue:@"submit"];
 		NSXMLElement *field = [NSXMLElement elementWithName:@"field"];
 		[field addAttributeWithName:@"var" stringValue:@"stream-method"];
-		NSXMLElement *value = [NSXMLElement elementWithName:@"value" stringValue:method];
+		NSXMLElement *value = [NSXMLElement elementWithName:@"value" stringValue:transfer.streamMethod];
 		[field addChild:value];
 		[x addChild:field];
 		[feature addChild:x];
 		[si addChild:feature];
 		
-		XMPPIQ *result = [XMPPIQ iqWithType:@"result" to:offer.from elementID:offer.elementID child:si];
+		_incomingTransfers[transfer.uniqueIdentifier] = transfer;
+		XMPPIQ *result = [XMPPIQ iqWithType:@"result" to:transfer.remoteJID elementID:transfer.uniqueIdentifier child:si];
 		[xmppStream sendElement:result];
 	};
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -192,7 +194,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		dispatch_async(moduleQueue, block);
 }
 
-- (void)rejectStreamInitiationOffer:(XMPPIQ *)offer
+- (void)rejectOfferForTransfer:(XMPPSITransfer *)transfer
 {
 	dispatch_block_t block = ^{
 		NSXMLElement *error = [NSXMLElement elementWithName:@"error"];
@@ -203,7 +205,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[text setStringValue:@"Offer Declined"];
 		[error addChild:forbidden];
 		[error addChild:text];
-		XMPPIQ *errorIQ = [XMPPIQ iqWithType:@"error" to:offer.from elementID:offer.elementID child:error];
+		XMPPIQ *errorIQ = [XMPPIQ iqWithType:@"error" to:transfer.remoteJID elementID:transfer.uniqueIdentifier child:error];
 		[xmppStream sendElement:errorIQ];
 	};
 	if (dispatch_get_current_queue() == moduleQueue)
@@ -226,20 +228,24 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSXMLElement *si = [iq elementForName:@"si" xmlns:XMLNSJabberSI];
-	if (si) {
+	if ([iq elementForName:@"si" xmlns:XMLNSJabberSI]) {
 		// Received a stream initiation offer
 		if ([iq.type isEqualToString:@"set"]) {
 			[self handleStreamInitiationOffer:iq];
 			return YES;
 		}
 		// Received a stream initiation result
-		if ([iq.type isEqualToString:@"result"] && iq.elementID) {
-			if (iq.elementID && _outgoingTransfers[iq.elementID]) {
-				[self handleStreamInitiationResult:iq];
-				return YES;
-			}
+		if ([iq.type isEqualToString:@"result"] && iq.elementID && _outgoingTransfers[iq.elementID]) {
+			[self handleStreamInitiationResult:iq];
+			return YES;
 		}
+	// Incoming TURN Request
+	} else if ([iq.type isEqualToString:@"set"]
+			   && [iq elementForName:@"query" xmlns:XMPPSIProfileSOCKS5Transfer]
+			   && iq.elementID
+			   && _incomingTransfers[iq.elementID]) {
+		[self handleTURNRequest:iq];
+		return YES;
 	}
 	return NO;
 }
@@ -361,7 +367,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 	if ([[si attributeStringValueForName:@"profile"] isEqualToString:XMLNSJabberSIFileTransfer]) {
 		// Check for valid file name and file size
 		NSXMLElement *file = [si elementForName:@"file" xmlns:XMLNSJabberSIFileTransfer];
-		if (![[file attributeStringValueForName:@"name"] length] || ![file attributeIntegerValueForName:@"size"]) {
+		NSString *fileName = [file attributeStringValueForName:@"name"];
+		NSUInteger fileSize = [file attributeUnsignedIntegerValueForName:@"size"];
+		if (![fileName length] || !fileSize) {
 			[self sendProfileNotUnderstoodErrorForIQ:iq];
 		}
 		NSArray *streamMethods = [self.class extractStreamMethodsFromIQ:iq];
@@ -373,13 +381,41 @@ static NSArray *_supportedTransferMechanisms = nil;
 			}
 		}];
 		if (hasSupportedStreamMethod) {
-			[multicastDelegate xmppSIFileTransferReceivedStreamInitiationOffer:iq];
+			XMPPSITransfer *transfer = [XMPPSITransfer new];
+			// Prefer SOCKS5 bytestream, using IBB as a last resort
+			if ([streamMethods containsObject:XMPPSIProfileSOCKS5Transfer]) {
+				transfer.streamMethod = XMPPSIProfileSOCKS5Transfer;
+			} else {
+				transfer.streamMethod = XMPPSIProfileIBBTransfer;
+			}
+			transfer.remoteJID = iq.from;
+			transfer.uniqueIdentifier = iq.elementID;
+			transfer.totalBytes = fileSize;
+			transfer.outgoing = NO;
+			transfer.fileName = fileName;
+			transfer.fileDescription = [[file elementForName:@"desc"] stringValue];
+			transfer.mimeType = [si attributeStringValueForName:@"mime-type"];
+			transfer.MD5Hash = [file attributeStringValueForName:@"hash"];
+			NSString *dateString = [file attributeStringValueForName:@"date"] ;
+			if ([dateString length]) {
+				transfer.lastModifiedDate = [NSDate dateWithXmppDateTimeString:dateString];
+			}
+			[multicastDelegate xmppSIFileTransferReceivedOfferForTransfer:transfer];
 		} else {
 			[self sendNoValidStreamsErrorForIQ:iq];
 		}
 	} else {
 		[self sendProfileNotUnderstoodErrorForIQ:iq];
 	}
+}
+
+- (void)handleTURNRequest:(XMPPIQ *)iq
+{
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
+	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream incomingTURNRequest:iq];
+	transfer.socket = socket;
+	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
 }
 
 - (void)sendProfileNotUnderstoodErrorForIQ:(XMPPIQ *)iq
