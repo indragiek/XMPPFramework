@@ -14,7 +14,7 @@ extern NSString* const XMLNSJabberSIFileTransfer; // @"http://jabber.org/protoco
 extern NSString* const XMPPSIProfileSOCKS5Transfer; // @"http://jabber.org/protocol/bytestreams"
 extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol/ibb"
 
-@class XMPPTransfer;
+@class XMPPSITransfer;
 /*
  * Implementation of XEP-0095 Stream Initiation for initiating a data stream between
  * two XMPP entities, and XEP-0096, which uses stream initiation for the purpose of
@@ -35,15 +35,15 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  * mimeType - The MIME type of the file (optional)
  * hash - The MD5 hash of the file (optional)
  * lastModifiedDate - The date when the file was last modified (optional)
- * streamMethods - Array of stream methods that the file transfer will support. Some possible values:
+ * streamMethods - Array of stream methods that the file transfer will support. SUPPORTED VALUES:
  *		http://jabber.org/protocol/bytestreams - SOCKS5 Bytestream (XEP-0065)
  *		http://jabber.org/protocol/ibb - In Band Bytestream (XEP-0047)
  * supportsRangedTransfer - Whether the receiver can request a specific range of the file
  * jid - The target JID to send the offer to
  * 
- * Returns an XMPPTransfer object representing this stream initiation offer.
+ * Returns an XMPPSITransfer object representing this stream initiation offer.
  */
-- (XMPPTransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
+- (XMPPSITransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
 												  data:(NSData *)data
 										   description:(NSString *)description
 											  mimeType:(NSString *)mimeType
@@ -57,9 +57,9 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  * Fills in the hash & size automatically, and passes the default stream methods supported by 
  * this class (XMPPSIProfileSOCKS5Transfer and XMPPSIProfileIBBTransfer) and YES for supportsRangedTransfer
  *
- * Returns an XMPPTransfer object representing this stream initiation offer.
+ * Returns an XMPPSITransfer object representing this stream initiation offer.
  */
-- (XMPPTransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
+- (XMPPSITransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
 												  data:(NSData *)data
 											  mimeType:(NSString *)mimeType
 												 toJID:(XMPPJID *)jid;
@@ -87,43 +87,43 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 @protocol XMPPSIFileTransferDelegate <NSObject>
 @optional
 /*
- * Called when another XMPP entity sends a stream initiation offer
+ * Called when another XMPP entity sends a stream initiation offer for a file transfer
  */
-- (void)xmppSIFileTransferReceivedStreamInitiationOffer:(XMPPIQ *)offer;
+- (void)xmppSIFileTransferReceivedOffer:(XMPPIQ *)iq forTransfer:(XMPPSITransfer *)transfer;
 
 /*
  * Called when the XMPP stream has successfully sent a stream initiation offer
  */
-- (void)xmppSIFileTransferDidSendOfferForTransfer:(XMPPTransfer *)transfer;
+- (void)xmppSIFileTransferDidSendOfferForTransfer:(XMPPSITransfer *)transfer;
 
 /*
  * Called when either an outgoing or incoming file transfer begins
  */
-- (void)xmppSIFileTransferDidBegin:(XMPPTransfer *)transfer;
+- (void)xmppSIFileTransferDidBegin:(XMPPSITransfer *)transfer;
 
 /*
  * Called when a file transfer completes. (If this is an incoming transfer, this means
  * that you can now access the data property to retrieve the downloaded file data).
  */
-- (void)xmppSIFileTransferDidEnd:(XMPPTransfer *)transfer;
+- (void)xmppSIFileTransferDidEnd:(XMPPSITransfer *)transfer;
 
 /*
  * Called when the specified file transfer fails with error information if available
  */
-- (void)xmppSIFileTransferFailed:(XMPPTransfer *)transfer withError:(NSError *)error;
+- (void)xmppSIFileTransferFailed:(XMPPSITransfer *)transfer withError:(NSError *)error;
 
 /*
  * Called to inform the delegate of the progress of the file transfer operation. The totalBytes
  * and transferredBytes properties of XMPPTransfer (which are also KVO observable) can be used
  * to determine the percentage completion of the transfer).
  */
-- (void)xmppSIFileTransferUpdatedProgress:(XMPPTransfer *)transfer;
+- (void)xmppSIFileTransferUpdatedProgress:(XMPPSITransfer *)transfer;
 @end
 
 /*
  * Class that represents an XMPP file transfer via XMPPSIFileTransfer
  */
-@interface XMPPTransfer : NSObject
+@interface XMPPSITransfer : NSObject
 /*
  * The stream transfer method being used to transfer the file
  */

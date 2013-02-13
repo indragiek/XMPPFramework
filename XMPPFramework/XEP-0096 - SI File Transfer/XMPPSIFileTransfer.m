@@ -25,8 +25,8 @@ static NSString* const XMPPSIFileTransferErrorDomain = @"XMPPSIFileTransferError
 
 static NSArray *_supportedTransferMechanisms = nil;
 
-@protocol XMPPTransferDelegate;
-@interface XMPPTransfer () <GCDAsyncSocketDelegate, TURNSocketDelegate, XMPPInBandBytestreamDelegate>
+@protocol XMPPSITransferDelegate;
+@interface XMPPSITransfer () <GCDAsyncSocketDelegate, TURNSocketDelegate, XMPPInBandBytestreamDelegate>
 @property (nonatomic, strong, readwrite) XMPPJID *remoteJID;
 @property (nonatomic, copy, readwrite) NSString *streamMethod;
 @property (nonatomic, strong, readwrite) NSData *data;
@@ -42,18 +42,18 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 @property (nonatomic, strong, readwrite) TURNSocket *socket;
 @property (nonatomic, strong) XMPPInBandBytestream *inBandBytestream;
-@property (nonatomic, weak) id<XMPPTransferDelegate> delegate;
+@property (nonatomic, weak) id<XMPPSITransferDelegate> delegate;
 @end
 
-@protocol XMPPTransferDelegate <NSObject>
+@protocol XMPPSITransferDelegate <NSObject>
 @required
-- (void)xmppTransfer:(XMPPTransfer *)transfer failedWithError:(NSError *)error;
-- (void)xmppTransferDidBegin:(XMPPTransfer *)transfer;
-- (void)xmppTransferUpdatedProgress:(XMPPTransfer *)transfer;
-- (void)xmppTransferDidEnd:(XMPPTransfer *)transfer;
+- (void)xmppTransfer:(XMPPSITransfer *)transfer failedWithError:(NSError *)error;
+- (void)xmppTransferDidBegin:(XMPPSITransfer *)transfer;
+- (void)xmppTransferUpdatedProgress:(XMPPSITransfer *)transfer;
+- (void)xmppTransferDidEnd:(XMPPSITransfer *)transfer;
 @end
 
-@interface XMPPSIFileTransfer () <XMPPTransferDelegate>
+@interface XMPPSIFileTransfer () <XMPPSITransferDelegate>
 @end
 
 @implementation XMPPSIFileTransfer {
@@ -78,7 +78,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 #pragma mark - Public API
 
-- (XMPPTransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
+- (XMPPSITransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
 												  data:(NSData *)data
 										   description:(NSString *)description
 											  mimeType:(NSString *)mimeType
@@ -88,7 +88,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 												 toJID:(XMPPJID *)jid
 {
 	NSAssert(data, @"%@ called with nil data", NSStringFromSelector(_cmd));
-	__block XMPPTransfer *transfer = nil;
+	__block XMPPSITransfer *transfer = nil;
 	dispatch_block_t block = ^{
 		NSXMLElement *si = [NSXMLElement elementWithName:@"si" xmlns:XMLNSJabberSI];
 		[si addAttributeWithName:@"id" stringValue:@"a0"];
@@ -131,7 +131,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		XMPPIQ *offer = [XMPPIQ iqWithType:@"set" to:jid elementID:identifier child:si];
 		[xmppStream sendElement:offer];
 		
-		transfer = [XMPPTransfer new];
+		transfer = [XMPPSITransfer new];
 		transfer.fileName = name;
 		transfer.data = data;
 		transfer.fileDescription = description;
@@ -151,7 +151,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	return transfer;
 }
 
-- (XMPPTransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
+- (XMPPSITransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
 												  data:(NSData *)data
 											  mimeType:(NSString *)mimeType
 												 toJID:(XMPPJID *)jid
@@ -217,7 +217,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)xmppStream:(XMPPStream *)sender didSendIQ:(XMPPIQ *)iq
 {
 	if ([iq.type isEqualToString:@"set"] && [iq elementForName:@"si" xmlns:XMLNSJabberSI] && iq.elementID) {
-		XMPPTransfer *transfer = _outgoingTransfers[iq.elementID];
+		XMPPSITransfer *transfer = _outgoingTransfers[iq.elementID];
 		if (transfer) {
 			[multicastDelegate xmppSIFileTransferDidSendOfferForTransfer:transfer];
 		}
@@ -244,25 +244,25 @@ static NSArray *_supportedTransferMechanisms = nil;
 	return NO;
 }
 
-#pragma mark - XMPPTransferDelegate
+#pragma mark - XMPPSITransferDelegate
 
-- (void)xmppTransfer:(XMPPTransfer *)transfer failedWithError:(NSError *)error
+- (void)xmppTransfer:(XMPPSITransfer *)transfer failedWithError:(NSError *)error
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self transferFailed:transfer error:error];
 }
 
-- (void)xmppTransferDidBegin:(XMPPTransfer *)transfer
+- (void)xmppTransferDidBegin:(XMPPSITransfer *)transfer
 {
 	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
 }
 
-- (void)xmppTransferUpdatedProgress:(XMPPTransfer *)transfer
+- (void)xmppTransferUpdatedProgress:(XMPPSITransfer *)transfer
 {
 	[multicastDelegate xmppSIFileTransferUpdatedProgress:transfer];
 }
 
-- (void)xmppTransferDidEnd:(XMPPTransfer *)transfer
+- (void)xmppTransferDidEnd:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self removeTransfer:transfer];
@@ -271,7 +271,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 #pragma mark - Private
 
-- (void)removeTransfer:(XMPPTransfer *)transfer
+- (void)removeTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	if (!transfer.uniqueIdentifier) return;
@@ -279,20 +279,20 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[_incomingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 }
 
-- (void)transferFailed:(XMPPTransfer *)transfer error:(NSError *)error
+- (void)transferFailed:(XMPPSITransfer *)transfer error:(NSError *)error
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self removeTransfer:transfer];
 	[multicastDelegate xmppSIFileTransferFailed:transfer withError:error];
 }
 
-- (void)transferDidBegin:(XMPPTransfer *)transfer
+- (void)transferDidBegin:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
 }
 
-- (void)beginOutgoingTransfer:(XMPPTransfer *)transfer
+- (void)beginOutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	if ([transfer.streamMethod isEqualToString:XMPPSIProfileSOCKS5Transfer]) {
@@ -302,7 +302,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	}
 }
 
-- (void)beginSOCKS5OutgoingTransfer:(XMPPTransfer *)transfer
+- (void)beginSOCKS5OutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream toJID:transfer.remoteJID elementID:transfer.uniqueIdentifier];
@@ -310,7 +310,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
 }
 
-- (void)beginIBBOutgoingTransfer:(XMPPTransfer *)transfer
+- (void)beginIBBOutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initOutgoingBytestreamToJID:transfer.remoteJID elementID:transfer.uniqueIdentifier data:transfer.data];
@@ -323,7 +323,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *si = [iq elementForName:@"si" xmlns:XMLNSJabberSI];
-	XMPPTransfer *transfer = _outgoingTransfers[iq.elementID];
+	XMPPSITransfer *transfer = _outgoingTransfers[iq.elementID];
 	if (transfer) {
 		NSArray *streamMethods = [self.class extractStreamMethodsFromIQ:iq];
 		if ([streamMethods count]) {
@@ -442,7 +442,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 }
 @end
 
-@implementation XMPPTransfer
+@implementation XMPPSITransfer
 
 #pragma mark - NSObject
 
