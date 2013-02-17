@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0315B1E716D192960007A0FA /* INSOCKSServer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0315B1E516D192960007A0FA /* INSOCKSServer.h */; };
+		0315B1E816D192960007A0FA /* INSOCKSServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0315B1E616D192960007A0FA /* INSOCKSServer.m */; };
+		0315B1EC16D198F80007A0FA /* PortMapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 0315B1EA16D198F80007A0FA /* PortMapper.h */; };
+		0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 0315B1EB16D198F80007A0FA /* PortMapper.m */; };
 		032D586316C158A1009577E1 /* XMPPCapabilities.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 032D585A16C158A1009577E1 /* XMPPCapabilities.xcdatamodel */; };
 		032D586416C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		032D586516C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D585C16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m */; };
@@ -141,6 +145,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0315B1E516D192960007A0FA /* INSOCKSServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = INSOCKSServer.h; path = INSOCKSServer/INSOCKSServer/Classes/INSOCKSServer.h; sourceTree = "<group>"; };
+		0315B1E616D192960007A0FA /* INSOCKSServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = INSOCKSServer.m; path = INSOCKSServer/INSOCKSServer/Classes/INSOCKSServer.m; sourceTree = "<group>"; };
+		0315B1EA16D198F80007A0FA /* PortMapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PortMapper.h; path = "XMPPFramework/XEP-0065 - SOCKS5/PortMapper.h"; sourceTree = "<group>"; };
+		0315B1EB16D198F80007A0FA /* PortMapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PortMapper.m; path = "XMPPFramework/XEP-0065 - SOCKS5/PortMapper.m"; sourceTree = "<group>"; };
 		032D585A16C158A1009577E1 /* XMPPCapabilities.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPCapabilities.xcdatamodel; sourceTree = "<group>"; };
 		032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCapabilitiesCoreDataStorage.h; sourceTree = "<group>"; };
 		032D585C16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCapabilitiesCoreDataStorage.m; sourceTree = "<group>"; };
@@ -300,6 +308,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0315B1E416D1925D0007A0FA /* INSOCKSServer */ = {
+			isa = PBXGroup;
+			children = (
+				0315B1E516D192960007A0FA /* INSOCKSServer.h */,
+				0315B1E616D192960007A0FA /* INSOCKSServer.m */,
+			);
+			name = INSOCKSServer;
+			sourceTree = "<group>";
+		};
+		0315B1E916D198D70007A0FA /* PortMapper */ = {
+			isa = PBXGroup;
+			children = (
+				0315B1EA16D198F80007A0FA /* PortMapper.h */,
+				0315B1EB16D198F80007A0FA /* PortMapper.m */,
+			);
+			name = PortMapper;
+			sourceTree = "<group>";
+		};
 		032D585816C158A1009577E1 /* XEP-0115 - Capabilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -669,6 +695,8 @@
 		0393679D169D26B900986388 /* External */ = {
 			isa = PBXGroup;
 			children = (
+				0315B1E916D198D70007A0FA /* PortMapper */,
+				0315B1E416D1925D0007A0FA /* INSOCKSServer */,
 				039367A3169D297F00986388 /* CocoaLumberjack */,
 				0393679E169D297600986388 /* GCDAsyncSocket */,
 			);
@@ -786,6 +814,8 @@
 				0375AD0516C213530029EFF1 /* XMPPSIFileTransfer.h in Headers */,
 				03B9E8F116C8B4C2002F2730 /* TURNSocket.h in Headers */,
 				0371704516CA05F500EDE221 /* XMPPInBandBytestream.h in Headers */,
+				0315B1E716D192960007A0FA /* INSOCKSServer.h in Headers */,
+				0315B1EC16D198F80007A0FA /* PortMapper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -908,6 +938,8 @@
 				0375AD0616C213530029EFF1 /* XMPPSIFileTransfer.m in Sources */,
 				03B9E8F216C8B4C2002F2730 /* TURNSocket.m in Sources */,
 				0371704616CA05F500EDE221 /* XMPPInBandBytestream.m in Sources */,
+				0315B1E816D192960007A0FA /* INSOCKSServer.m in Sources */,
+				0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

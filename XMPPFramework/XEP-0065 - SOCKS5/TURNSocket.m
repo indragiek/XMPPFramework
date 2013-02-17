@@ -4,6 +4,8 @@
 #import "GCDAsyncSocket.h"
 #import "NSData+XMPP.h"
 #import "NSNumber+XMPP.h"
+#import "INSOCKSServer.h"
+#import "PortMapper.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -213,7 +215,10 @@ static NSMutableArray *proxyCandidates;
  * Initializes a new TURN socket to create a TCP connection by routing through a proxy.
  * This constructor configures the object to be the client connecting to a server.
 **/
-- (id)initWithStream:(XMPPStream *)stream toJID:(XMPPJID *)aJid elementID:(NSString *)elementID
+- (id)initWithStream:(XMPPStream *)stream
+			   toJID:(XMPPJID *)aJid
+		   elementID:(NSString *)elementID
+	   useLocalProxy:(BOOL)useLocalProxy
 {
 	if ((self = [super init]))
 	{
@@ -238,6 +243,17 @@ static NSMutableArray *proxyCandidates;
 		// Each host in this list will be queried to see if it can be used as a proxy
 		proxyCandidates = [[self class] proxyCandidates];
 		
+		// If using a local proxy, start the proxy server on a randomized port
+		if (useLocalProxy) {
+			NSError *error = nil;
+			proxyServer = [[INSOCKSServer alloc] initWithPort:0 error:&error];
+			if (error) {
+				if ([delegate respondsToSelector:@selector(turnSocketDidFail:)]) {
+					[delegate turnSocketDidFail:self];
+				}
+				return nil;
+			}
+		}
 		// Configure everything else
 		[self performPostInitSetup];
 	}
@@ -833,11 +849,24 @@ static NSMutableArray *proxyCandidates;
 - (void)queryProxyCandidates
 {
 	XMPPLogTrace();
-	
 	// Prepare the streamhosts array, which will hold all of our results
 	streamhosts = [[NSMutableArray alloc] initWithCapacity:[proxyCandidates count]];
-	
-	// Start querying each candidate in order
+	if (proxyServer) {
+		// If we're using a local proxy server, create a streamhost for the local proxy server
+		// using our public IP address and the known port on which the server is listening on
+		NSXMLElement *streamhost = [NSXMLElement elementWithName:@"streamhost"];
+		NSString *publicIP = [PortMapper findPublicAddress];
+		// We're cheating a bit here. The XEP-0065 states that "This attribute MUST be present,
+		// and MUST be a valid JID for communication over XMPP.". This is not a valid JID
+		// for communication over XMPP. In order to provide a JID, localhost would need to
+		// be running its own XMPP server with a SOCKS5 proxy module. We're essentially assuming
+		// that the entity receiving these hosts won't bother to query the JID for anything
+		// and will just use the given host and port for the transfer.
+		[streamhost addAttributeWithName:@"jid" stringValue:publicIP];
+		[streamhost addAttributeWithName:@"host" stringValue:publicIP];
+		[streamhost addAttributeWithName:@"port" stringValue:@(proxyServer.port).stringValue];
+		[streamhosts addObject:streamhost];
+	}
 	proxyCandidateIndex = -1;
 	[self queryNextProxyCandidate];
 }
