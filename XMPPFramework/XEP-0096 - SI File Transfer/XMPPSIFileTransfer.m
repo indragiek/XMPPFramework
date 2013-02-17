@@ -316,7 +316,10 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)beginSOCKS5OutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
-	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream toJID:transfer.remoteJID elementID:transfer.uniqueIdentifier];
+	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream
+													  toJID:transfer.remoteJID
+												  elementID:transfer.uniqueIdentifier
+											  useLocalProxy:YES];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
 }
