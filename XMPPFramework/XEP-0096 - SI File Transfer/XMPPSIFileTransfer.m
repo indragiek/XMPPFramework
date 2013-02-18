@@ -66,7 +66,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 + (void)load
 {
 	[super load];
-	_supportedTransferMechanisms = @[XMPPSIProfileIBBTransfer];
+	_supportedTransferMechanisms = @[XMPPSIProfileIBBTransfer, XMPPSIProfileSOCKS5Transfer];
 	[TURNSocket setProxyCandidates:nil];
 }
 
@@ -400,8 +400,11 @@ static NSArray *_supportedTransferMechanisms = nil;
 		}];
 		if (hasSupportedStreamMethod) {
 			XMPPSITransfer *transfer = [XMPPSITransfer new];
-			// TODO: Support SOCKS5
-			transfer.streamMethod = XMPPSIProfileIBBTransfer;
+			if ([streamMethods containsObject:XMPPSIProfileSOCKS5Transfer]) {
+				transfer.streamMethod = XMPPSIProfileSOCKS5Transfer;
+			} else {
+				transfer.streamMethod = XMPPSIProfileIBBTransfer;
+			}
 			transfer.delegate = self;
 			transfer.remoteJID = iq.from;
 			transfer.uniqueIdentifier = iq.elementID;
