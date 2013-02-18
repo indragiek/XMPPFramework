@@ -244,6 +244,14 @@ static NSMutableArray *proxyCandidates;
 		proxyCandidates = [[self class] proxyCandidates];
 		
 		// If using a local proxy, start the proxy server on a randomized port
+		
+		// *** IMPORTANT NOTE ***
+		// As of now, the use of a local proxy is broken. The main reason is that the XEP-0065 protocol
+		// instructs clients to use the hash of the JIDs as the destination address when negotiating
+		// with the SOCKS proxy server. This doesn't work with a generic SOCKS server like we're using
+		// here because it attempts to connect to the hash as if it's a domain name and fails. Seems
+		// like using SOCKS5 bytestreams really does require an XMPP server that implements the SOCKS5
+		// module to appropriately negotiate the transfer.
 		if (useLocalProxy) {
 			NSError *error = nil;
 			proxyServer = [[INSOCKSServer alloc] initWithPort:0 error:&error];
