@@ -60,6 +60,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 @implementation XMPPSIFileTransfer {
 	NSMutableDictionary *_outgoingTransfers;
 	NSMutableDictionary *_incomingTransfers;
+	NSMutableArray *_activeTransfers;
 }
 
 + (void)load
@@ -74,6 +75,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	if ((self = [super initWithDispatchQueue:queue])) {
 		_outgoingTransfers = [NSMutableDictionary dictionary];
 		_incomingTransfers = [NSMutableDictionary dictionary];
+		_activeTransfers = [NSMutableArray array];
 	}
 	return self;
 }
@@ -287,6 +289,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	if (!transfer.uniqueIdentifier) return;
+	[_activeTransfers removeObject:transfer];
 	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 	[_incomingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 }
@@ -307,6 +310,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)beginOutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	[_activeTransfers addObject:transfer];
 	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 	if ([transfer.streamMethod isEqualToString:XMPPSIProfileSOCKS5Transfer]) {
 		[self beginSOCKS5OutgoingTransfer:transfer];
@@ -398,6 +402,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 			} else {
 				transfer.streamMethod = XMPPSIProfileIBBTransfer;
 			}
+			transfer.delegate = self;
 			transfer.remoteJID = iq.from;
 			transfer.uniqueIdentifier = iq.elementID;
 			transfer.totalBytes = fileSize;
@@ -423,6 +428,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
+	[_activeTransfers addObject:transfer];
 	[_incomingTransfers removeObjectForKey:iq.elementID];
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream incomingTURNRequest:iq];
 	transfer.socket = socket;
@@ -433,6 +439,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
+	[_activeTransfers addObject:transfer];
 	[_incomingTransfers removeObjectForKey:iq.elementID];
 	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initIncomingBytestreamRequest:iq];
 	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
@@ -499,7 +506,10 @@ static NSArray *_supportedTransferMechanisms = nil;
 }
 @end
 
-@implementation XMPPSITransfer
+@implementation XMPPSITransfer {
+	GCDAsyncSocket *_asyncSocket;
+	BOOL _wroteData;
+}
 
 #pragma mark - NSObject
 
@@ -513,13 +523,14 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)turnSocket:(TURNSocket *)sender didSucceed:(GCDAsyncSocket *)socket
 {
 	[self.delegate xmppTransferDidBegin:self];
-	[socket setDelegate:self];
-	[socket setDelegateQueue:dispatch_get_current_queue()];
+	_asyncSocket = socket;
+	[_asyncSocket setDelegate:self];
+	[_asyncSocket setDelegateQueue:dispatch_get_current_queue()];
 	if (self.outgoing) {
 		// -1 timeout means no time out. See GCDAsyncSocket docs for more information.
-		[socket writeData:self.data withTimeout:-1 tag:0];
+		[_asyncSocket writeData:self.data withTimeout:-1 tag:0];
 	} else {
-		[socket readDataWithTimeout:-1 tag:0];
+		[_asyncSocket readDataWithTimeout:-1 tag:0];
 	}
 }
 
@@ -532,7 +543,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
-	if (err) {
+	if (_wroteData) {
+		[self.delegate xmppTransferDidEnd:self];
+	} else {
 		[self.delegate xmppTransfer:self failedWithError:err ?: [self.class asyncSocketDisconnectedError]];
 	}
 }
@@ -549,7 +562,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
-	[self.delegate xmppTransferDidEnd:self];
+	_wroteData = YES;
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
