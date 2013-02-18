@@ -461,7 +461,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 + (NSArray *)extractStreamMethodsFromIQ:(XMPPIQ *)iq
 {
-	NSXMLElement *si = [iq elementForName:@"si"];
+	NSXMLElement *si = [iq elementForName:@"si" xmlns:XMLNSJabberSI];
 	NSXMLElement *feature = [si elementForName:@"feature" xmlns:XMLNSJabberFeatureNeg];
 	NSXMLElement *x = [feature elementForName:@"x" xmlns:XMLNSJabberXData];
 	NSXMLElement *field = [x elementForName:@"field"];
