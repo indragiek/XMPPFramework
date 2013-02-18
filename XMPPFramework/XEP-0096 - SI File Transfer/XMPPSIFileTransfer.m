@@ -532,7 +532,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
-	[self.delegate xmppTransfer:self failedWithError:err ?: [self.class asyncSocketDisconnectedError]];
+	if (err) {
+		[self.delegate xmppTransfer:self failedWithError:err ?: [self.class asyncSocketDisconnectedError]];
+	}
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag

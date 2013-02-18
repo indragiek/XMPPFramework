@@ -526,15 +526,21 @@ static NSMutableArray *proxyCandidates;
 	
 	XMPPLogTrace();
 	
-	NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
-	
-	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
-	[query addChild:activate];
-	
-	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
-	
-	[xmppStream sendElement:iq];
+	// If we're using a local proxy, we can proceed straight to -succeed
+	// because we don't need to send activate to the non existent XMPP proxy server
+	if (proxyServer) {
+		[self succeed];
+	} else  {
+		NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
+		
+		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+		[query addAttributeWithName:@"sid" stringValue:uuid];
+		[query addChild:activate];
+		
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
+		
+		[xmppStream sendElement:iq];
+	}
 	
 	// Update state
 	state = STATE_ACTIVATE_SENT;
@@ -1253,7 +1259,6 @@ static NSMutableArray *proxyCandidates;
 - (void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(UInt16)port
 {
 	XMPPLogTrace();
-	
 	// Start the SOCKS protocol stuff
 	[self socksOpen];
 }
