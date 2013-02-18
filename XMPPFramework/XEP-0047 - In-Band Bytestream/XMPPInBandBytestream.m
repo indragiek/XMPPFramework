@@ -236,7 +236,8 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 		[data addAttributeWithName:@"sid" stringValue:_sid];
 		NSData *subdata = [self.data subdataWithRange:dataRange];
 		data.stringValue = [subdata base64Encoded];
-		[xmppStream sendElement:data];
+		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self.remoteJID elementID:self.elementID child:data];
+		[xmppStream sendElement:iq];
 		_byteOffset += dataRange.length;
 		_seq++;
 		if (_seq > XMPPIBBMaximumBlockSize) {

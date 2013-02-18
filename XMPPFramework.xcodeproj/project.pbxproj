@@ -20,6 +20,8 @@
 		032D586916C158A1009577E1 /* XMPPCapsResourceCoreDataStorageObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D586016C158A1009577E1 /* XMPPCapsResourceCoreDataStorageObject.m */; };
 		032D586A16C158A1009577E1 /* XMPPCapabilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D586116C158A1009577E1 /* XMPPCapabilities.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		032D586B16C158A1009577E1 /* XMPPCapabilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D586216C158A1009577E1 /* XMPPCapabilities.m */; };
+		0347683416D1E13C00B1DB23 /* XMPPOutOfBandData.h in Headers */ = {isa = PBXBuildFile; fileRef = 0347683216D1E13C00B1DB23 /* XMPPOutOfBandData.h */; };
+		0347683516D1E13C00B1DB23 /* XMPPOutOfBandData.m in Sources */ = {isa = PBXBuildFile; fileRef = 0347683316D1E13C00B1DB23 /* XMPPOutOfBandData.m */; };
 		035B5B8416A363C90098CB09 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 039366A7169D25D100986388 /* Cocoa.framework */; };
 		035B5B9216A364000098CB09 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367A5169D298F00986388 /* DDAbstractDatabaseLogger.m */; };
 		035B5B9316A364000098CB09 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 039367A7169D298F00986388 /* DDASLLogger.m */; };
@@ -158,6 +160,8 @@
 		032D586016C158A1009577E1 /* XMPPCapsResourceCoreDataStorageObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCapsResourceCoreDataStorageObject.m; sourceTree = "<group>"; };
 		032D586116C158A1009577E1 /* XMPPCapabilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCapabilities.h; sourceTree = "<group>"; };
 		032D586216C158A1009577E1 /* XMPPCapabilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCapabilities.m; sourceTree = "<group>"; };
+		0347683216D1E13C00B1DB23 /* XMPPOutOfBandData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPOutOfBandData.h; path = "XEP-0066 - Out of Band Data/XMPPOutOfBandData.h"; sourceTree = "<group>"; };
+		0347683316D1E13C00B1DB23 /* XMPPOutOfBandData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPOutOfBandData.m; path = "XEP-0066 - Out of Band Data/XMPPOutOfBandData.m"; sourceTree = "<group>"; };
 		035B5B8316A363C90098CB09 /* XMPPFramework.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XMPPFramework.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		035B5BC416A364470098CB09 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		035B5BC716A3644D0098CB09 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
@@ -360,6 +364,15 @@
 			path = "Core Data";
 			sourceTree = "<group>";
 		};
+		0347683116D1E11400B1DB23 /* XEP-0066 - Out of Band Data */ = {
+			isa = PBXGroup;
+			children = (
+				0347683216D1E13C00B1DB23 /* XMPPOutOfBandData.h */,
+				0347683316D1E13C00B1DB23 /* XMPPOutOfBandData.m */,
+			);
+			name = "XEP-0066 - Out of Band Data";
+			sourceTree = "<group>";
+		};
 		0371704216CA05CA00EDE221 /* XEP-0047 - In-Band Bytestream */ = {
 			isa = PBXGroup;
 			children = (
@@ -451,6 +464,7 @@
 				0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */,
 				03B9E8EE16C8B4B0002F2730 /* XEP-0065 - SOCKS5 */,
 				0371704216CA05CA00EDE221 /* XEP-0047 - In-Band Bytestream */,
+				0347683116D1E11400B1DB23 /* XEP-0066 - Out of Band Data */,
 				03936720169D26B400986388 /* XMPP Core */,
 				039366AE169D25D100986388 /* Supporting Files */,
 			);
@@ -816,6 +830,7 @@
 				0371704516CA05F500EDE221 /* XMPPInBandBytestream.h in Headers */,
 				0315B1E716D192960007A0FA /* INSOCKSServer.h in Headers */,
 				0315B1EC16D198F80007A0FA /* PortMapper.h in Headers */,
+				0347683416D1E13C00B1DB23 /* XMPPOutOfBandData.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -940,6 +955,7 @@
 				0371704616CA05F500EDE221 /* XMPPInBandBytestream.m in Sources */,
 				0315B1E816D192960007A0FA /* INSOCKSServer.m in Sources */,
 				0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */,
+				0347683516D1E13C00B1DB23 /* XMPPOutOfBandData.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

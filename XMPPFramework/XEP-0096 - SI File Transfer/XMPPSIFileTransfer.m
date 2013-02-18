@@ -289,6 +289,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	if (!transfer.uniqueIdentifier) return;
+	if (transfer.inBandBytestream) {
+		[transfer.inBandBytestream deactivate];
+	}
 	[_activeTransfers removeObject:transfer];
 	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 	[_incomingTransfers removeObjectForKey:transfer.uniqueIdentifier];
@@ -334,6 +337,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initOutgoingBytestreamToJID:transfer.remoteJID elementID:transfer.uniqueIdentifier data:transfer.data];
+	[bytestream activate:xmppStream];
 	transfer.inBandBytestream = bytestream;
 	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
 	[bytestream start];
@@ -442,6 +446,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[_activeTransfers addObject:transfer];
 	[_incomingTransfers removeObjectForKey:iq.elementID];
 	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initIncomingBytestreamRequest:iq];
+	transfer.inBandBytestream = bytestream;
+	[bytestream activate:xmppStream];
 	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
 	[bytestream start];
 }
@@ -595,6 +601,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)xmppIBBTransferDidEnd:(XMPPInBandBytestream *)stream
 {
+	self.data = self.inBandBytestream.data;
 	[self.delegate xmppTransferDidEnd:self];
 }
 
