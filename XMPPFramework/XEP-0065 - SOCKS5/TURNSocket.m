@@ -237,7 +237,7 @@ static NSMutableArray *proxyCandidates;
 		// while at the same time client B could be initiating a connection to server A.
 		// So an incoming connection from JID clientB@deusty.com/home would be for which turn socket?
 		uuid = [elementID copy];
-		sid = [sid copy];
+		sid = [sid copy] ?: uuid;
 		
 		// Setup initial state for a client connection
 		state = STATE_INIT;
