@@ -167,6 +167,10 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  */
 @property (nonatomic, copy, readonly) NSString *uniqueIdentifier;
 /*
+ * The SID of the transfer
+ */
+@property (nonatomic, copy, readonly) NSString *sid;
+/*
  * The date the file was last modified, if available
  */
 @property (nonatomic, strong, readonly) NSDate *lastModifiedDate;

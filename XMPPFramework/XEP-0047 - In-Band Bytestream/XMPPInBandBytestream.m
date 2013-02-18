@@ -29,6 +29,7 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 
 - (id)initOutgoingBytestreamToJID:(XMPPJID *)jid
 						elementID:(NSString *)elementID
+							  sid:(NSString *)sid
 							 data:(NSData *)data
 {
 	if ((self = [super initWithDispatchQueue:NULL])) {
@@ -36,8 +37,8 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 		_data = data;
 		_blockSize = XMPPIBBMaximumBlockSize;
 		// Generate a unique ID when an elementID is not given
-		_elementID = elementID ?: [xmppStream generateUUID];
-		_sid = _elementID;
+		_elementID = [elementID copy] ?: [xmppStream generateUUID];
+		_sid = [sid copy] ?: _elementID;
 		_byteOffset = 0;
 		_outgoing = YES;
 	}
@@ -201,7 +202,7 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *open = [NSXMLElement elementWithName:@"open" xmlns:XMLNSProtocolIBB];
 	[open addAttributeWithName:@"block-size" stringValue:[@(self.blockSize) stringValue]];
-	[open addAttributeWithName:@"sid" stringValue:self.elementID];
+	[open addAttributeWithName:@"sid" stringValue:self.sid];
 	[open addAttributeWithName:@"stanza" stringValue:@"iq"];
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self.remoteJID elementID:self.elementID child:open];
 	[xmppStream sendElement:iq];
@@ -233,7 +234,7 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 	if (dataRange.length) {
 		NSXMLElement *data = [NSXMLElement elementWithName:@"data" xmlns:XMLNSProtocolIBB];
 		[data addAttributeWithName:@"seq" stringValue:[@(_seq) stringValue]];
-		[data addAttributeWithName:@"sid" stringValue:_sid];
+		[data addAttributeWithName:@"sid" stringValue:self.sid];
 		NSData *subdata = [self.data subdataWithRange:dataRange];
 		data.stringValue = [subdata base64Encoded];
 		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self.remoteJID elementID:self.elementID child:data];
@@ -255,7 +256,7 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *close = [NSXMLElement elementWithName:@"close" xmlns:XMLNSProtocolIBB];
-	[close addAttributeWithName:@"sid" stringValue:_sid];
+	[close addAttributeWithName:@"sid" stringValue:self.sid];
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:self.remoteJID elementID:self.elementID child:close];
 	[xmppStream sendElement:iq];
 	[multicastDelegate xmppIBBTransferDidEnd:self];

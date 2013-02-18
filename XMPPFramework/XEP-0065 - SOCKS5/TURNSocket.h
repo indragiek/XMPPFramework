@@ -23,6 +23,7 @@
 	XMPPStream *xmppStream;
 	XMPPJID *jid;
 	NSString *uuid;
+	NSString *sid;
 	
 	id delegate;
 	dispatch_queue_t delegateQueue;
@@ -60,6 +61,7 @@
 - (id)initWithStream:(XMPPStream *)stream
 			   toJID:(XMPPJID *)aJid
 		   elementID:(NSString *)elementID
+				 sid:(NSString *)aSid
 	directConnection:(BOOL)direct;
 
 - (id)initWithStream:(XMPPStream *)stream incomingTURNRequest:(XMPPIQ *)iq;

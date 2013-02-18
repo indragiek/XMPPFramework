@@ -32,6 +32,7 @@
  */
 - (id)initOutgoingBytestreamToJID:(XMPPJID *)jid
 						elementID:(NSString *)elementID
+							  sid:(NSString *)sid
 							 data:(NSData *)data;
 
 /*
@@ -72,6 +73,11 @@
  * Element ID for IQ elements used in all communication for this transfer
  */
 @property (nonatomic, copy, readonly) NSString *elementID;
+
+/*
+ * SID for all IBB related elements
+ */
+@property (nonatomic, copy, readonly) NSString *sid;
 @end
 
 @protocol XMPPInBandBytestreamDelegate <NSObject>

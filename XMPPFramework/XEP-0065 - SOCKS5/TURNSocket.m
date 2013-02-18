@@ -220,7 +220,8 @@ static NSMutableArray *proxyCandidates;
 - (id)initWithStream:(XMPPStream *)stream
 			   toJID:(XMPPJID *)aJid
 		   elementID:(NSString *)elementID
-	directConnection:(BOOL)direct
+				 sid:(NSString *)aSid
+	directConnection:(BOOL)direct;
 {
 	if ((self = [super init]))
 	{
@@ -236,6 +237,7 @@ static NSMutableArray *proxyCandidates;
 		// while at the same time client B could be initiating a connection to server A.
 		// So an incoming connection from JID clientB@deusty.com/home would be for which turn socket?
 		uuid = [elementID copy];
+		sid = [sid copy];
 		
 		// Setup initial state for a client connection
 		state = STATE_INIT;
@@ -267,16 +269,19 @@ static NSMutableArray *proxyCandidates;
 		xmppStream = stream;
 		jid = [iq from];
 		
+		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+		// Extract streamhost information from turn request
+		streamhosts = [[query elementsForName:@"streamhost"] mutableCopy];
+		
 		// Store a copy of the ID (which will be our uuid)
 		uuid = [[iq elementID] copy];
+		sid = [query attributeStringValueForName:@"sid"];
 		
 		// Setup initial state for a server connection
 		state = STATE_INIT;
 		isClient = NO;
 		
-		// Extract streamhost information from turn request
-		NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-		streamhosts = [[query elementsForName:@"streamhost"] mutableCopy];
+		
 		
 		// Configure everything else
 		[self performPostInitSetup];
@@ -471,7 +476,7 @@ static NSMutableArray *proxyCandidates;
 	// </iq>
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
+	[query addAttributeWithName:@"sid" stringValue:sid];
 	[query addAttributeWithName:@"mode" stringValue:@"tcp"];
 	
 	NSUInteger i;
@@ -508,7 +513,7 @@ static NSMutableArray *proxyCandidates;
 	[streamhostUsed addAttributeWithName:@"jid" stringValue:[proxyJID full]];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
+	[query addAttributeWithName:@"sid" stringValue:sid];
 	[query addChild:streamhostUsed];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"result" to:jid elementID:uuid child:query];
@@ -529,7 +534,7 @@ static NSMutableArray *proxyCandidates;
 	NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
 	
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-	[query addAttributeWithName:@"sid" stringValue:uuid];
+	[query addAttributeWithName:@"sid" stringValue:sid];
 	[query addChild:activate];
 	
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
@@ -573,6 +578,7 @@ static NSMutableArray *proxyCandidates;
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+	NSLog(@"RECEIVED IQ: %@", iq.prettyXMLString);
 	// Catch errors and fail
 	if ([[iq type] isEqualToString:@"error"] && ([iq.elementID isEqualToString:uuid] || [iq.elementID isEqualToString:discoUUID])) {
 		[self fail];
@@ -761,7 +767,7 @@ static NSMutableArray *proxyCandidates;
 {
 	XMPPLogTrace();
 	// Target has replied - hopefully they've been able to connect to one of the streamhosts
-	
+	NSLog(@"RESPONSE: %@", iq);
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	NSXMLElement *streamhostUsed = [query elementForName:@"streamhost-used"];
 	
@@ -788,7 +794,6 @@ static NSMutableArray *proxyCandidates;
 			}
 			
 			proxyPort = [[[streamhost attributeForName:@"port"] stringValue] intValue];
-			
 			found = YES;
 		}
 	}
@@ -1256,7 +1261,7 @@ static NSMutableArray *proxyCandidates;
 	XMPPJID *initiatorJID = isClient ? myJID : jid;
 	XMPPJID *targetJID    = isClient ? jid   : myJID;
 	
-	NSString *hashMe = [NSString stringWithFormat:@"%@%@%@", uuid, [initiatorJID full], [targetJID full]];
+	NSString *hashMe = [NSString stringWithFormat:@"%@%@%@", sid, [initiatorJID full], [targetJID full]];
 	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] sha1Digest];
 	NSData *hash = [[hashRaw hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
 	
@@ -1409,6 +1414,7 @@ static NSMutableArray *proxyCandidates;
 				// Version = 5 (for SOCKS5)
 				// Method  = 0 (No authentication, anonymous access)
 				NSData *reply = [NSData dataWithBytes:"\x05\x00" length:2];
+				NSLog(@"SOCKS_DIRECT_CONNECT SUCCESSFUL");
 				[asyncSocket writeData:reply withTimeout:-1 tag:SOCKS_DIRECT_CONNECT_REPLY_1];
 				[asyncSocket readDataToLength:5 withTimeout:TIMEOUT_READ tag:SOCKS_DIRECT_CONNECT_REPLY_1];
 			} else {
@@ -1447,6 +1453,7 @@ static NSMutableArray *proxyCandidates;
 		}
 	}
 	else if (tag == SOCKS_DIRECT_CONNECT_REPLY_1_HASH) {
+		
 		// Subtracting 2 bytes for the port (UInt16)
 		NSData *hashData = [data subdataWithRange:NSMakeRange(0, [data length] - 2)];
 		// Verify the hash before starting the transfer

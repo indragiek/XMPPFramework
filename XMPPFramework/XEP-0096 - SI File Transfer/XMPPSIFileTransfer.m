@@ -40,9 +40,10 @@ static NSArray *_supportedTransferMechanisms = nil;
 @property (nonatomic, copy, readwrite) NSString *mimeType;
 @property (nonatomic, copy, readwrite) NSString *MD5Hash;
 @property (nonatomic, copy, readwrite) NSString *uniqueIdentifier;
+@property (nonatomic, copy, readwrite) NSString *sid;
 @property (nonatomic, strong, readwrite) NSDate *lastModifiedDate;
 
-@property (nonatomic, strong, readwrite) TURNSocket *socket;
+@property (nonatomic, strong) TURNSocket *socket;
 @property (nonatomic, strong) XMPPInBandBytestream *inBandBytestream;
 @property (nonatomic, weak) id<XMPPSITransferDelegate> delegate;
 @end
@@ -95,8 +96,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 	NSAssert(data, @"%@ called with nil data", NSStringFromSelector(_cmd));
 	__block XMPPSITransfer *transfer = nil;
 	dispatch_block_t block = ^{
+		NSString *identifier = [xmppStream generateUUID];
 		NSXMLElement *si = [NSXMLElement elementWithName:@"si" xmlns:XMLNSJabberSI];
-		[si addAttributeWithName:@"id" stringValue:@"a0"];
+		[si addAttributeWithName:@"id" stringValue:identifier];
 		[si addAttributeWithName:@"profile" stringValue:XMLNSJabberSIFileTransfer];
 		[si addAttributeWithName:@"mime-type" stringValue:mimeType ?: @"application/octet-stream"];
 		NSXMLElement *file = [NSXMLElement elementWithName:@"file" xmlns:XMLNSJabberSIFileTransfer];
@@ -132,7 +134,6 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[feature addChild:x];
 		[si addChild:feature];
 		
-		NSString *identifier = [xmppStream generateUUID];
 		XMPPIQ *offer = [XMPPIQ iqWithType:@"set" to:jid elementID:identifier child:si];
 		[xmppStream sendElement:offer];
 		
@@ -144,6 +145,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		transfer.totalBytes = length;
 		transfer.MD5Hash = hash;
 		transfer.uniqueIdentifier = identifier;
+		transfer.sid = identifier;
 		transfer.outgoing = YES;
 		transfer.remoteJID = jid;
 		transfer.delegate = self;
@@ -175,6 +177,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	dispatch_block_t block = ^{
 		NSXMLElement *si = [NSXMLElement elementWithName:@"si" xmlns:XMLNSJabberSI];
+		[si addAttributeWithName:@"id" stringValue:transfer.sid];
 		NSXMLElement *file = [NSXMLElement elementWithName:@"file" xmlns:XMLNSJabberSIFileTransfer];
 		[si addChild:file];
 		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature" xmlns:XMLNSJabberFeatureNeg];
@@ -188,7 +191,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[feature addChild:x];
 		[si addChild:feature];
 		
-		_incomingTransfers[transfer.uniqueIdentifier] = transfer;
+		_incomingTransfers[transfer.sid] = transfer;
 		XMPPIQ *result = [XMPPIQ iqWithType:@"result" to:transfer.remoteJID elementID:transfer.uniqueIdentifier child:si];
 		[xmppStream sendElement:result];
 	};
@@ -238,17 +241,22 @@ static NSArray *_supportedTransferMechanisms = nil;
 			[self handleStreamInitiationOffer:iq];
 			return YES;
 		// Incoming TURN request
-		} else if ([iq elementForName:@"query" xmlns:XMPPSIProfileSOCKS5Transfer]
-					&& iq.elementID
-					&& _incomingTransfers[iq.elementID]) {
-			[self handleTURNRequest:iq];
-			return YES;
-		// Incoming In-Band Bytestream Request
-		} else if ([iq elementForName:@"open" xmlns:XMPPSIProfileIBBTransfer]
-				   && iq.elementID
-				   && _incomingTransfers[iq.elementID]) {
-			[self handleIBBRequest:iq];
-			return YES;
+		} else {
+			NSXMLElement *query = [iq elementForName:@"query" xmlns:XMPPSIProfileSOCKS5Transfer];
+			NSXMLElement *open = [iq elementForName:@"open" xmlns:XMPPSIProfileIBBTransfer];
+			NSString *sid = [query ?: open attributeStringValueForName:@"sid"];
+			if (sid) {
+				XMPPSITransfer *transfer = _incomingTransfers[sid];
+				if (transfer) {
+					if (query) {
+						[self handleTURNRequest:iq forTransfer:transfer];
+						return YES;
+					} else if (open) {
+						[self handleIBBRequest:iq forTransfer:transfer];
+						return YES;
+					}
+				}
+			}
 		}
 	} else if ([iq.type isEqualToString:@"result"]) {
 		if (iq.elementID && _outgoingTransfers[iq.elementID]) {
@@ -289,13 +297,13 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)removeTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
-	if (!transfer.uniqueIdentifier) return;
+	if (!transfer.sid) return;
 	if (transfer.inBandBytestream) {
 		[transfer.inBandBytestream deactivate];
 	}
 	[_activeTransfers removeObject:transfer];
-	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
-	[_incomingTransfers removeObjectForKey:transfer.uniqueIdentifier];
+	[_outgoingTransfers removeObjectForKey:transfer.sid];
+	[_incomingTransfers removeObjectForKey:transfer.sid];
 }
 
 - (void)transferFailed:(XMPPSITransfer *)transfer error:(NSError *)error
@@ -315,7 +323,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[_activeTransfers addObject:transfer];
-	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
+	[_outgoingTransfers removeObjectForKey:transfer.sid];
 	if ([transfer.streamMethod isEqualToString:XMPPSIProfileSOCKS5Transfer]) {
 		[self beginSOCKS5OutgoingTransfer:transfer];
 	} else if ([transfer.streamMethod isEqualToString:XMPPSIProfileIBBTransfer]) {
@@ -326,9 +334,11 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)beginSOCKS5OutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream
 													  toJID:transfer.remoteJID
 												  elementID:transfer.uniqueIdentifier
+														sid:transfer.sid
 											  directConnection:YES];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
@@ -337,7 +347,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)beginIBBOutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
-	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initOutgoingBytestreamToJID:transfer.remoteJID elementID:transfer.uniqueIdentifier data:transfer.data];
+	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initOutgoingBytestreamToJID:transfer.remoteJID elementID:transfer.uniqueIdentifier sid:transfer.sid data:transfer.data];
 	[bytestream activate:xmppStream];
 	transfer.inBandBytestream = bytestream;
 	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
@@ -367,6 +377,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 						transfer.dataRange = NSMakeRange(offset, length);
 					}
 				}
+				XMPPIQ *result = [XMPPIQ iqWithType:@"result" to:iq.from elementID:iq.elementID];
+				[xmppStream sendElement:result];
 				[self beginOutgoingTransfer:transfer];
 			} else {
 				[self sendNoValidStreamsErrorForIQ:iq];
@@ -409,6 +421,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 			transfer.delegate = self;
 			transfer.remoteJID = iq.from;
 			transfer.uniqueIdentifier = iq.elementID;
+			transfer.sid = [si attributeStringValueForName:@"id"];
 			transfer.totalBytes = fileSize;
 			transfer.outgoing = NO;
 			transfer.fileName = fileName;
@@ -428,10 +441,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 	}
 }
 
-- (void)handleTURNRequest:(XMPPIQ *)iq
+- (void)handleTURNRequest:(XMPPIQ *)iq forTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
-	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
 	[_activeTransfers addObject:transfer];
 	[_incomingTransfers removeObjectForKey:iq.elementID];
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream incomingTURNRequest:iq];
@@ -439,10 +451,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
 }
 
-- (void)handleIBBRequest:(XMPPIQ *)iq
+- (void)handleIBBRequest:(XMPPIQ *)iq forTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
-	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
 	[_activeTransfers addObject:transfer];
 	[_incomingTransfers removeObjectForKey:iq.elementID];
 	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initIncomingBytestreamRequest:iq];
