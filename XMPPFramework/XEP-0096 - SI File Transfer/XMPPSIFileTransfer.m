@@ -95,7 +95,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[si addAttributeWithName:@"id" stringValue:@"a0"];
 		[si addAttributeWithName:@"profile" stringValue:XMLNSJabberSIFileTransfer];
 		[si addAttributeWithName:@"mime-type" stringValue:mimeType ?: @"application/octet-stream"];
-		NSXMLElement *file = [NSXMLElement elementWithName:@"si" xmlns:XMLNSJabberSIFileTransfer];
+		NSXMLElement *file = [NSXMLElement elementWithName:@"file" xmlns:XMLNSJabberSIFileTransfer];
 		[file addAttributeWithName:@"name" stringValue:name ?: @"untitled"];
 		NSString *hash = [data md5String];
 		NSUInteger length = [data length];
@@ -112,7 +112,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 			[file addChild:[NSXMLElement elementWithName:@"range"]];
 		}
 		[si addChild:file];
-		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature" stringValue:XMLNSJabberFeatureNeg];
+		NSXMLElement *feature = [NSXMLElement elementWithName:@"feature" xmlns:XMLNSJabberFeatureNeg];
 		NSXMLElement *x = [NSXMLElement elementWithName:@"x" xmlns:XMLNSJabberXData];
 		[x addAttributeWithName:@"type" stringValue:@"form"];
 		NSXMLElement *field = [NSXMLElement elementWithName:@"field"];
@@ -306,6 +306,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)beginOutgoingTransfer:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
+	[_outgoingTransfers removeObjectForKey:transfer.uniqueIdentifier];
 	if ([transfer.streamMethod isEqualToString:XMPPSIProfileSOCKS5Transfer]) {
 		[self beginSOCKS5OutgoingTransfer:transfer];
 	} else if ([transfer.streamMethod isEqualToString:XMPPSIProfileIBBTransfer]) {
@@ -421,6 +422,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
+	[_incomingTransfers removeObjectForKey:iq.elementID];
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream incomingTURNRequest:iq];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
@@ -430,6 +432,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	XMPPSITransfer *transfer = _incomingTransfers[iq.elementID];
+	[_incomingTransfers removeObjectForKey:iq.elementID];
 	XMPPInBandBytestream *bytestream = [[XMPPInBandBytestream alloc] initIncomingBytestreamRequest:iq];
 	[bytestream addDelegate:transfer delegateQueue:moduleQueue];
 	[bytestream start];
