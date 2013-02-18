@@ -22,6 +22,7 @@ static NSString* const XMLNSJabberXData = @"jabber:x:data";
 static NSString* const XMLNSXMPPStanzas = @"urn:ietf:params:xml:ns:xmpp-stanzas";
 
 static NSString* const XMPPSIFileTransferErrorDomain = @"XMPPSIFileTransferErrorDomain";
+static NSTimeInterval const XMPPSIFileTransferReadTimeout = 10.0;
 
 static NSArray *_supportedTransferMechanisms = nil;
 
@@ -513,7 +514,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 @implementation XMPPSITransfer {
 	GCDAsyncSocket *_asyncSocket;
-	BOOL _wroteData;
+	BOOL _transferComplete;
+	NSMutableData *_dataBuffer;
 }
 
 #pragma mark - NSObject
@@ -535,7 +537,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 		// -1 timeout means no time out. See GCDAsyncSocket docs for more information.
 		[_asyncSocket writeData:self.data withTimeout:-1 tag:0];
 	} else {
-		[_asyncSocket readDataWithTimeout:-1 tag:0];
+		_dataBuffer = [NSMutableData data];
+		[_asyncSocket readDataWithTimeout:XMPPSIFileTransferReadTimeout tag:0];
 	}
 }
 
@@ -548,7 +551,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
 {
-	if (_wroteData) {
+	if (_transferComplete) {
 		[self.delegate xmppTransferDidEnd:self];
 	} else {
 		[self.delegate xmppTransfer:self failedWithError:err ?: [self.class asyncSocketDisconnectedError]];
@@ -560,20 +563,22 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[self incrementTransferredBytesBy:partialLength];
 }
 
-- (void)socket:(GCDAsyncSocket *)sock didReadPartialDataOfLength:(NSUInteger)partialLength tag:(long)tag
-{
-	[self incrementTransferredBytesBy:partialLength];
-}
-
 - (void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
-	_wroteData = YES;
+	_transferComplete = YES;
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
 {
-	self.data = data;
-	[self.delegate xmppTransferDidEnd:self];
+    [_dataBuffer appendData:data];
+    [self incrementTransferredBytesBy:[data length]];
+    if ([_dataBuffer length] == self.totalBytes) {
+        self.data = _dataBuffer;
+        _transferComplete = YES;
+        [self.delegate xmppTransferDidEnd:self];
+    } else {
+        [sock readDataWithTimeout:XMPPSIFileTransferReadTimeout tag:0];
+    }
 }
 
 #pragma mark -XMPPInBandBytestreamDelegate

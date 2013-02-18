@@ -57,10 +57,13 @@
 #define STATE_FAILURE            31
 
 // Define various socket tags
-#define SOCKS_OPEN             101
-#define SOCKS_CONNECT          102
-#define SOCKS_CONNECT_REPLY_1  103
-#define SOCKS_CONNECT_REPLY_2  104
+#define SOCKS_OPEN							101
+#define SOCKS_CONNECT						102
+#define SOCKS_CONNECT_REPLY_1				103
+#define SOCKS_CONNECT_REPLY_2				104
+#define SOCKS_DIRECT_CONNECT				105
+#define SOCKS_DIRECT_CONNECT_REPLY_1		106
+#define SOCKS_DIRECT_CONNECT_REPLY_1_HASH	107
 
 // Define various timeouts (in seconds)
 #define TIMEOUT_DISCO_ITEMS   8.00
@@ -480,6 +483,7 @@ static NSMutableArray *proxyCandidates;
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:jid elementID:uuid child:query];
 	
 	[xmppStream sendElement:iq];
+	NSLog(@"Sending request: %@", iq.prettyXMLString);
 	
 	// Update state
 	state = STATE_REQUEST_SENT;
@@ -843,21 +847,23 @@ static NSMutableArray *proxyCandidates;
 /**
  Sets up a socket for a direct connection to the target
  */
+
 - (void)setupDirectConnection
 {
 	asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:turnQueue];
 	NSError *error = nil;
 	if (![asyncSocket acceptOnPort:0 error:&error]) {
 		[self fail];
+		return;
 	}
-	PortMapper *mapper = [[PortMapper alloc] initWithPort:[asyncSocket localPort]];
-	[mapper open];
-	[mapper waitTillOpened];
-	if (mapper.publicPort) {
+	portMapper = [[PortMapper alloc] initWithPort:[asyncSocket localPort]];
+	[portMapper open];
+	[portMapper waitTillOpened];
+	if (portMapper.publicPort) {
 		NSXMLElement *streamhost = [NSXMLElement elementWithName:@"streamhost"];
-		[streamhost addAttributeWithName:@"jid" stringValue:jid.full];
-		[streamhost addAttributeWithName:@"host" stringValue:mapper.publicAddress];
-		[streamhost addAttributeWithName:@"port" stringValue:@(mapper.publicPort).stringValue];
+		[streamhost addAttributeWithName:@"jid" stringValue:xmppStream.myJID.full];
+		[streamhost addAttributeWithName:@"host" stringValue:portMapper.publicAddress];
+		[streamhost addAttributeWithName:@"port" stringValue:@(portMapper.publicPort).stringValue];
 		streamhosts = [NSMutableArray arrayWithObject:streamhost];
 		[self sendRequest];
 	} else {
@@ -1173,25 +1179,6 @@ static NSMutableArray *proxyCandidates;
 - (void)socksConnect
 {
 	XMPPLogTrace();
-	
-	XMPPJID *myJID = [xmppStream myJID];
-	
-	// From XEP-0065:
-	// 
-	// The [address] MUST be SHA1(SID + Initiator JID + Target JID) and
-	// the output is hexadecimal encoded (not binary).
-	
-	XMPPJID *initiatorJID = isClient ? myJID : jid;
-	XMPPJID *targetJID    = isClient ? jid   : myJID;
-	
-	NSString *hashMe = [NSString stringWithFormat:@"%@%@%@", uuid, [initiatorJID full], [targetJID full]];
-	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] sha1Digest];
-	NSData *hash = [[hashRaw hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
-	
-	XMPPLogVerbose(@"TURNSocket: hashMe : %@", hashMe);
-	XMPPLogVerbose(@"TURNSocket: hashRaw: %@", hashRaw);
-	XMPPLogVerbose(@"TURNSocket: hash   : %@", hash);
-	
 	//      +-----+-----+-----+------+------+------+
 	// NAME | VER | CMD | RSV | ATYP | ADDR | PORT |
 	//      +-----+-----+-----+------+------+------+
@@ -1206,7 +1193,7 @@ static NSMutableArray *proxyCandidates;
 	// Address Type = 3 (1=IPv4, 3=DomainName 4=IPv6)
 	// Address      = P:D (P=LengthOfDomain D=DomainWithoutNullTermination)
 	// Port         = 0
-	
+	NSData *hash = [self socksHash];
 	uint byteBufferLength = (uint)(4 + 1 + [hash length] + 2);
 	void *byteBuffer = malloc(byteBufferLength);
 	
@@ -1255,6 +1242,28 @@ static NSMutableArray *proxyCandidates;
 	// So just in case, we'll read up to the address length now, and then read in the address+port next.
 	
 	[asyncSocket readDataToLength:5 withTimeout:TIMEOUT_READ tag:SOCKS_CONNECT_REPLY_1];
+}
+
+- (NSData *)socksHash
+{
+	XMPPJID *myJID = [xmppStream myJID];
+	
+	// From XEP-0065:
+	//
+	// The [address] MUST be SHA1(SID + Initiator JID + Target JID) and
+	// the output is hexadecimal encoded (not binary).
+	
+	XMPPJID *initiatorJID = isClient ? myJID : jid;
+	XMPPJID *targetJID    = isClient ? jid   : myJID;
+	
+	NSString *hashMe = [NSString stringWithFormat:@"%@%@%@", uuid, [initiatorJID full], [targetJID full]];
+	NSData *hashRaw = [[hashMe dataUsingEncoding:NSUTF8StringEncoding] sha1Digest];
+	NSData *hash = [[hashRaw hexStringValue] dataUsingEncoding:NSUTF8StringEncoding];
+	
+	XMPPLogVerbose(@"TURNSocket: hashMe : %@", hashMe);
+	XMPPLogVerbose(@"TURNSocket: hashRaw: %@", hashRaw);
+	XMPPLogVerbose(@"TURNSocket: hash   : %@", hash);
+	return hash;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1362,6 +1371,112 @@ static NSMutableArray *proxyCandidates;
 			[self succeed];
 		}
 	}
+	else if (tag == SOCKS_DIRECT_CONNECT)
+	{
+		XMPPLogVerbose(@"TURNSocket: SOCKS_DIRECT_CONNECT: %@", data);
+		//      +-----+-----------+---------+
+		// NAME | VER | NMETHODS  | METHODS |
+		//      +-----+-----------+---------+
+		// SIZE |  1  |    1      | 1 - 255 |
+		//      +-----+-----------+---------+
+		//
+		// Note: Size is in bytes
+		//
+		// Version    = 5 (for SOCKS5)
+		// NumMethods = 1
+		// Method     = 0 (No authentication, anonymous access)
+		UInt8 ver = [NSNumber extractUInt8FromData:data atOffset:0];
+		UInt8 nMtd = [NSNumber extractUInt8FromData:data atOffset:1];
+		UInt8 mtds[nMtd];
+		[data getBytes:&mtds range:NSMakeRange(2, nMtd)];
+		if (ver == 5) {
+			BOOL hasAnonymousAuthentication = NO;
+			for (int i = 0; i < nMtd; i++) {
+				if (mtds[i] == 0) {
+					hasAnonymousAuthentication = YES;
+					break;
+				}
+			}
+			if (hasAnonymousAuthentication) {
+				//      +-----+--------+
+				// NAME | VER | METHOD |
+				//      +-----+--------+
+				// SIZE |  1  |   1    |
+				//      +-----+--------+
+				//
+				// Note: Size is in bytes
+				//
+				// Version = 5 (for SOCKS5)
+				// Method  = 0 (No authentication, anonymous access)
+				NSData *reply = [NSData dataWithBytes:"\x05\x00" length:2];
+				[asyncSocket writeData:reply withTimeout:-1 tag:SOCKS_DIRECT_CONNECT_REPLY_1];
+				[asyncSocket readDataToLength:5 withTimeout:TIMEOUT_READ tag:SOCKS_DIRECT_CONNECT_REPLY_1];
+			} else {
+				[asyncSocket disconnect];
+			}
+		} else {
+			[asyncSocket disconnect];
+		}
+	}
+	else if (tag == SOCKS_DIRECT_CONNECT_REPLY_1)
+	{
+		//      +-----+-----+-----+------+------+------+
+		// NAME | VER | CMD | RSV | ATYP | ADDR | PORT |
+		//      +-----+-----+-----+------+------+------+
+		// SIZE |  1  |  1  |  1  |  1   | var  |  2   |
+		//      +-----+-----+-----+------+------+------+
+		//
+		// Note: Size is in bytes
+		//
+		// Version      = 5 (for SOCKS5)
+		// Command      = 1 (for Connect)
+		// Reserved     = 0
+		// Address Type = 3 (1=IPv4, 3=DomainName 4=IPv6)
+		// Address      = P:D (P=LengthOfDomain D=DomainWithoutNullTermination)
+		// Port         = 0
+		UInt8 ver = [NSNumber extractUInt8FromData:data atOffset:0];
+		UInt8 cmd = [NSNumber extractUInt8FromData:data atOffset:1];
+		// Skipping reserved parameter at offset 2
+		UInt8 atyp = [NSNumber extractUInt8FromData:data atOffset:3];
+		UInt8 hashLength = [NSNumber extractUInt8FromData:data atOffset:4];
+		if (ver == 5 && cmd == 1 && atyp == 3 && hashLength) {
+			// Add two bytes for reading the port length too
+			[asyncSocket readDataToLength:hashLength + 2 withTimeout:TIMEOUT_READ tag:SOCKS_DIRECT_CONNECT_REPLY_1_HASH];
+		} else {
+			[asyncSocket disconnect];
+		}
+	}
+	else if (tag == SOCKS_DIRECT_CONNECT_REPLY_1_HASH) {
+		// Subtracting 2 bytes for the port (UInt16)
+		NSData *hashData = [data subdataWithRange:NSMakeRange(0, [data length] - 2)];
+		// Verify the hash before starting the transfer
+		if ([hashData isEqualToData:[self socksHash]]) {
+			//      +-----+-----+-----+------+------+------+
+			// NAME | VER | REP | RSV | ATYP | ADDR | PORT |
+			//      +-----+-----+-----+------+------+------+
+			// SIZE |  1  |  1  |  1  |  1   | var  |  2   |
+			//      +-----+-----+-----+------+------+------+
+			//
+			// Note: Size is in bytes
+			//
+			// Version      = 5 (for SOCKS5)
+			// Reply        = 0 (0=Succeeded, X=ErrorCode)
+			// Reserved     = 0
+			// Address Type = 3 (1=IPv4, 3=DomainName 4=IPv6)
+			// Address      = P:D (P=LengthOfDomain D=DomainWithoutNullTermination)
+			// Port         = 0
+			NSMutableData *response = [NSMutableData dataWithBytes:"\x05\x00\x00\x03" length:4];
+			UInt8 hashLength = (UInt8)[data length];
+			[response appendBytes:&hashLength length:1];
+			[response appendData:hashData];
+			UInt16 port = 0;
+			[response appendBytes:&port length:2];
+			[asyncSocket writeData:response withTimeout:-1 tag:SOCKS_DIRECT_CONNECT_REPLY_1_HASH];
+			[self succeed];
+		} else {
+			[asyncSocket disconnect];
+		}
+	}
 }
 
 - (void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err
@@ -1372,10 +1487,17 @@ static NSMutableArray *proxyCandidates;
 	{
 		[self targetNextConnect];
 	}
-	else if (state == STATE_INITIATOR_CONNECT)
+	else
 	{
 		[self fail];
 	}
+}
+
+- (void)socket:(GCDAsyncSocket *)sock didAcceptNewSocket:(GCDAsyncSocket *)newSocket
+{
+	[asyncSocket setDelegate:nil delegateQueue:NULL];
+	asyncSocket = newSocket;
+	[asyncSocket readDataToLength:3 withTimeout:TIMEOUT_READ tag:SOCKS_DIRECT_CONNECT];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
