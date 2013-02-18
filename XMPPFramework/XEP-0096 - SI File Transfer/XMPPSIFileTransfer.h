@@ -81,35 +81,35 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
 /*
  * Called when another XMPP entity sends a stream initiation offer for a file transfer
  */
-- (void)xmppSIFileTransferReceivedOfferForTransfer:(XMPPSITransfer *)transfer;
+- (void)xmppSIFileTransfer:(XMPPSIFileTransfer *)fileTransfer receivedOfferForTransfer:(XMPPSITransfer *)transfer;
 
 /*
  * Called when the XMPP stream has successfully sent a stream initiation offer
  */
-- (void)xmppSIFileTransferDidSendOfferForTransfer:(XMPPSITransfer *)transfer;
+- (void)xmppSIFileTransfer:(XMPPSIFileTransfer *)fileTransfer didSendOfferForTransfer:(XMPPSITransfer *)transfer;
 
 /*
  * Called when either an outgoing or incoming file transfer begins
  */
-- (void)xmppSIFileTransferDidBegin:(XMPPSITransfer *)transfer;
+- (void)xmppSIFileTransfer:(XMPPSIFileTransfer *)fileTransfer transferDidBegin:(XMPPSITransfer *)transfer;
 
 /*
  * Called when a file transfer completes. (If this is an incoming transfer, this means
  * that you can now access the data property to retrieve the downloaded file data).
  */
-- (void)xmppSIFileTransferDidEnd:(XMPPSITransfer *)transfer;
+- (void)xmppSIFileTransfer:(XMPPSIFileTransfer *)fileTransfer transferDidEnd:(XMPPSITransfer *)transfer;
 
 /*
  * Called when the specified file transfer fails with error information if available
  */
-- (void)xmppSIFileTransferFailed:(XMPPSITransfer *)transfer withError:(NSError *)error;
+- (void)xmppSIFileTransfer:(XMPPSIFileTransfer *)fileTransfer tranferFailed:(XMPPSITransfer *)transfer withError:(NSError *)error;
 
 /*
  * Called to inform the delegate of the progress of the file transfer operation. The totalBytes
  * and transferredBytes properties of XMPPTransfer (which are also KVO observable) can be used
  * to determine the percentage completion of the transfer).
  */
-- (void)xmppSIFileTransferUpdatedProgress:(XMPPSITransfer *)transfer;
+- (void)xmppSIFileTransfer:(XMPPSIFileTransfer *)fileTransfer transferUpdatedProgress:(XMPPSITransfer *)transfer;
 @end
 
 /*

@@ -224,7 +224,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	if ([iq.type isEqualToString:@"set"] && [iq elementForName:@"si" xmlns:XMLNSJabberSI] && iq.elementID) {
 		XMPPSITransfer *transfer = _outgoingTransfers[iq.elementID];
 		if (transfer) {
-			[multicastDelegate xmppSIFileTransferDidSendOfferForTransfer:transfer];
+			[multicastDelegate xmppSIFileTransfer:self didSendOfferForTransfer:transfer];
 		}
 	}
 }
@@ -268,19 +268,19 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)xmppTransferDidBegin:(XMPPSITransfer *)transfer
 {
-	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
+	[multicastDelegate xmppSIFileTransfer:self transferDidBegin:transfer];
 }
 
 - (void)xmppTransferUpdatedProgress:(XMPPSITransfer *)transfer
 {
-	[multicastDelegate xmppSIFileTransferUpdatedProgress:transfer];
+	[multicastDelegate xmppSIFileTransfer:self transferUpdatedProgress:transfer];
 }
 
 - (void)xmppTransferDidEnd:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self removeTransfer:transfer];
-	[multicastDelegate xmppSIFileTransferDidEnd:transfer];
+	[multicastDelegate xmppSIFileTransfer:self transferDidEnd:transfer];
 }
 
 #pragma mark - Private
@@ -301,13 +301,13 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[self removeTransfer:transfer];
-	[multicastDelegate xmppSIFileTransferFailed:transfer withError:error];
+	[multicastDelegate xmppSIFileTransfer:self tranferFailed:transfer withError:error];
 }
 
 - (void)transferDidBegin:(XMPPSITransfer *)transfer
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
-	[multicastDelegate xmppSIFileTransferDidBegin:transfer];
+	[multicastDelegate xmppSIFileTransfer:self transferDidBegin:transfer];
 }
 
 - (void)beginOutgoingTransfer:(XMPPSITransfer *)transfer
@@ -419,7 +419,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 			if ([dateString length]) {
 				transfer.lastModifiedDate = [NSDate dateWithXmppDateTimeString:dateString];
 			}
-			[multicastDelegate xmppSIFileTransferReceivedOfferForTransfer:transfer];
+			[multicastDelegate xmppSIFileTransfer:self receivedOfferForTransfer:transfer];
 		} else {
 			[self sendNoValidStreamsErrorForIQ:iq];
 		}
