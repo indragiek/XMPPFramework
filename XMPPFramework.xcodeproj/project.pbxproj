@@ -10,7 +10,7 @@
 		0315B1E716D192960007A0FA /* INSOCKSServer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0315B1E516D192960007A0FA /* INSOCKSServer.h */; };
 		0315B1E816D192960007A0FA /* INSOCKSServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0315B1E616D192960007A0FA /* INSOCKSServer.m */; };
 		0315B1EC16D198F80007A0FA /* PortMapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 0315B1EA16D198F80007A0FA /* PortMapper.h */; };
-		0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 0315B1EB16D198F80007A0FA /* PortMapper.m */; };
+		0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 0315B1EB16D198F80007A0FA /* PortMapper.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		032D586316C158A1009577E1 /* XMPPCapabilities.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 032D585A16C158A1009577E1 /* XMPPCapabilities.xcdatamodel */; };
 		032D586416C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		032D586516C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D585C16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m */; };
