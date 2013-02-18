@@ -5,6 +5,7 @@
 @class XMPPStream;
 @class GCDAsyncSocket;
 @class INSOCKSServer;
+@class PortMapper;
 
 /**
  * TURNSocket is an implementation of XEP-0065: SOCKS5 Bytestreams.
@@ -42,6 +43,7 @@
 	
 	XMPPJID *proxyJID;
 	INSOCKSServer *proxyServer;
+	PortMapper *portMapper;
 	NSString *proxyHost;
 	UInt16 proxyPort;
 	

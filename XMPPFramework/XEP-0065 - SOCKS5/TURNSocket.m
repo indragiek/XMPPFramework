@@ -248,9 +248,7 @@ static NSMutableArray *proxyCandidates;
 			NSError *error = nil;
 			proxyServer = [[INSOCKSServer alloc] initWithPort:0 error:&error];
 			if (error) {
-				if ([delegate respondsToSelector:@selector(turnSocketDidFail:)]) {
-					[delegate turnSocketDidFail:self];
-				}
+				[self fail];
 				return nil;
 			}
 		}
@@ -758,7 +756,6 @@ static NSMutableArray *proxyCandidates;
 - (void)processRequestResponse:(XMPPIQ *)iq
 {
 	XMPPLogTrace();
-	
 	// Target has replied - hopefully they've been able to connect to one of the streamhosts
 	
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
@@ -855,17 +852,22 @@ static NSMutableArray *proxyCandidates;
 		// If we're using a local proxy server, create a streamhost for the local proxy server
 		// using our public IP address and the known port on which the server is listening on
 		NSXMLElement *streamhost = [NSXMLElement elementWithName:@"streamhost"];
-		NSString *publicIP = [PortMapper findPublicAddress];
-		// We're cheating a bit here. The XEP-0065 states that "This attribute MUST be present,
-		// and MUST be a valid JID for communication over XMPP.". This is not a valid JID
-		// for communication over XMPP. In order to provide a JID, localhost would need to
-		// be running its own XMPP server with a SOCKS5 proxy module. We're essentially assuming
-		// that the entity receiving these hosts won't bother to query the JID for anything
-		// and will just use the given host and port for the transfer.
-		[streamhost addAttributeWithName:@"jid" stringValue:publicIP];
-		[streamhost addAttributeWithName:@"host" stringValue:publicIP];
-		[streamhost addAttributeWithName:@"port" stringValue:@(proxyServer.port).stringValue];
-		[streamhosts addObject:streamhost];
+		// Use UPnP/NAT-PMP to map the private proxy port to a publicly accessible port
+		portMapper = [[PortMapper alloc] initWithPort:proxyServer.port];
+		[portMapper open];
+		[portMapper waitTillOpened];
+		if (portMapper.publicPort) {
+			// We're cheating a bit here. The XEP-0065 states that "This attribute MUST be present,
+			// and MUST be a valid JID for communication over XMPP.". This is not a valid JID
+			// for communication over XMPP. In order to provide a JID, localhost would need to
+			// be running its own XMPP server with a SOCKS5 proxy module. We're essentially assuming
+			// that the entity receiving these hosts won't bother to query the JID for anything
+			// and will just use the given host and port for the transfer.
+			[streamhost addAttributeWithName:@"jid" stringValue:portMapper.publicAddress];
+			[streamhost addAttributeWithName:@"host" stringValue:portMapper.publicAddress];
+			[streamhost addAttributeWithName:@"port" stringValue:@(portMapper.publicPort).stringValue];
+			[streamhosts addObject:streamhost];
+		}
 	}
 	proxyCandidateIndex = -1;
 	[self queryNextProxyCandidate];
