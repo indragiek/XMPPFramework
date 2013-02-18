@@ -4,7 +4,6 @@
 #import "GCDAsyncSocket.h"
 #import "NSData+XMPP.h"
 #import "NSNumber+XMPP.h"
-#import "INSOCKSServer.h"
 #import "PortMapper.h"
 
 #if ! __has_feature(objc_arc)
@@ -218,7 +217,7 @@ static NSMutableArray *proxyCandidates;
 - (id)initWithStream:(XMPPStream *)stream
 			   toJID:(XMPPJID *)aJid
 		   elementID:(NSString *)elementID
-	   useLocalProxy:(BOOL)useLocalProxy
+	directConnection:(BOOL)direct
 {
 	if ((self = [super init]))
 	{
@@ -238,28 +237,13 @@ static NSMutableArray *proxyCandidates;
 		// Setup initial state for a client connection
 		state = STATE_INIT;
 		isClient = YES;
-		
-		// Get list of proxy candidates
-		// Each host in this list will be queried to see if it can be used as a proxy
-		proxyCandidates = [[self class] proxyCandidates];
-		
-		// If using a local proxy, start the proxy server on a randomized port
-		
-		// *** IMPORTANT NOTE ***
-		// As of now, the use of a local proxy is broken. The main reason is that the XEP-0065 protocol
-		// instructs clients to use the hash of the JIDs as the destination address when negotiating
-		// with the SOCKS proxy server. This doesn't work with a generic SOCKS server like we're using
-		// here because it attempts to connect to the hash as if it's a domain name and fails. Seems
-		// like using SOCKS5 bytestreams really does require an XMPP server that implements the SOCKS5
-		// module to appropriately negotiate the transfer.
-		if (useLocalProxy) {
-			NSError *error = nil;
-			proxyServer = [[INSOCKSServer alloc] initWithPort:0 error:&error];
-			if (error) {
-				[self fail];
-				return nil;
-			}
+		isDirect = direct;
+		if (!isDirect) {
+			// Get list of proxy candidates
+			// Each host in this list will be queried to see if it can be used as a proxy
+			proxyCandidates = [[self class] proxyCandidates];
 		}
+		
 		// Configure everything else
 		[self performPostInitSetup];
 	}
@@ -413,11 +397,15 @@ static NSMutableArray *proxyCandidates;
 		
 		// Start the TURN procedure
 		
-		if (isClient)
-			[self queryProxyCandidates];
-		else
+		if (isClient) {
+			if (isDirect) {
+				[self setupDirectConnection];
+			} else {
+				[self queryProxyCandidates];
+			}
+		} else {
 			[self targetConnect];
-		
+		}
 	}});
 }
 
@@ -534,21 +522,15 @@ static NSMutableArray *proxyCandidates;
 	
 	XMPPLogTrace();
 	
-	// If we're using a local proxy, we can proceed straight to -succeed
-	// because we don't need to send activate to the non existent XMPP proxy server
-	if (proxyServer) {
-		[self succeed];
-	} else  {
-		NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
-		
-		NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
-		[query addAttributeWithName:@"sid" stringValue:uuid];
-		[query addChild:activate];
-		
-		XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
-		
-		[xmppStream sendElement:iq];
-	}
+	NSXMLElement *activate = [NSXMLElement elementWithName:@"activate" stringValue:[jid full]];
+	
+	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
+	[query addAttributeWithName:@"sid" stringValue:uuid];
+	[query addChild:activate];
+	
+	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:proxyJID elementID:uuid child:query];
+	
+	[xmppStream sendElement:iq];
 	
 	// Update state
 	state = STATE_ACTIVATE_SENT;
@@ -587,9 +569,13 @@ static NSMutableArray *proxyCandidates;
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
+	// Catch errors and fail
+	if ([[iq type] isEqualToString:@"error"] && ([iq.elementID isEqualToString:uuid] || [iq.elementID isEqualToString:discoUUID])) {
+		[self fail];
+		return YES;
+	}
 	// Disco queries (sent to jabber server) use id=discoUUID
 	// P2P queries (sent to other Mojo app) use id=uuid
-	
 	if (state <= STATE_PROXY_DISCO_ADDR)
 	{
 		if (![discoUUID isEqualToString:[iq elementID]])
@@ -803,11 +789,15 @@ static NSMutableArray *proxyCandidates;
 		}
 	}
 	
-	if(found)
+	if (found)
 	{
 		// The target is connected to the proxy
 		// Now it's our turn to connect
-		[self initiatorConnect];
+		if (isDirect) {
+			[self succeed];
+		} else {
+			[self initiatorConnect];
+		}
 	}
 	else
 	{
@@ -851,6 +841,31 @@ static NSMutableArray *proxyCandidates;
 }
 
 /**
+ Sets up a socket for a direct connection to the target
+ */
+- (void)setupDirectConnection
+{
+	asyncSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:turnQueue];
+	NSError *error = nil;
+	if (![asyncSocket acceptOnPort:0 error:&error]) {
+		[self fail];
+	}
+	PortMapper *mapper = [[PortMapper alloc] initWithPort:[asyncSocket localPort]];
+	[mapper open];
+	[mapper waitTillOpened];
+	if (mapper.publicPort) {
+		NSXMLElement *streamhost = [NSXMLElement elementWithName:@"streamhost"];
+		[streamhost addAttributeWithName:@"jid" stringValue:jid.full];
+		[streamhost addAttributeWithName:@"host" stringValue:mapper.publicAddress];
+		[streamhost addAttributeWithName:@"port" stringValue:@(mapper.publicPort).stringValue];
+		streamhosts = [NSMutableArray arrayWithObject:streamhost];
+		[self sendRequest];
+	} else {
+		[self fail];
+	}
+}
+
+/**
  * Initiates the process of querying each item in the proxyCandidates array to determine if it supports XEP-65.
  * In order to do this we have to:
  * - ask the server for a list of services, which returns a list of JIDs
@@ -862,27 +877,7 @@ static NSMutableArray *proxyCandidates;
 	XMPPLogTrace();
 	// Prepare the streamhosts array, which will hold all of our results
 	streamhosts = [[NSMutableArray alloc] initWithCapacity:[proxyCandidates count]];
-	if (proxyServer) {
-		// If we're using a local proxy server, create a streamhost for the local proxy server
-		// using our public IP address and the known port on which the server is listening on
-		NSXMLElement *streamhost = [NSXMLElement elementWithName:@"streamhost"];
-		// Use UPnP/NAT-PMP to map the private proxy port to a publicly accessible port
-		portMapper = [[PortMapper alloc] initWithPort:proxyServer.port];
-		[portMapper open];
-		[portMapper waitTillOpened];
-		if (portMapper.publicPort) {
-			// We're cheating a bit here. The XEP-0065 states that "This attribute MUST be present,
-			// and MUST be a valid JID for communication over XMPP.". This is not a valid JID
-			// for communication over XMPP. In order to provide a JID, localhost would need to
-			// be running its own XMPP server with a SOCKS5 proxy module. We're essentially assuming
-			// that the entity receiving these hosts won't bother to query the JID for anything
-			// and will just use the given host and port for the transfer.
-			[streamhost addAttributeWithName:@"jid" stringValue:portMapper.publicAddress];
-			[streamhost addAttributeWithName:@"host" stringValue:portMapper.publicAddress];
-			[streamhost addAttributeWithName:@"port" stringValue:@(portMapper.publicPort).stringValue];
-			[streamhosts addObject:streamhost];
-		}
-	}
+
 	proxyCandidateIndex = -1;
 	[self queryNextProxyCandidate];
 }
@@ -1091,6 +1086,8 @@ static NSMutableArray *proxyCandidates;
 		{
 			XMPPLogError(@"TURNSocket: targetNextConnect: err: %@", err);
 			[self targetNextConnect];
+		} else {
+			isDirect = [proxyJID user] != nil;
 		}
 	}
 	else

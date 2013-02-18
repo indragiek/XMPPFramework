@@ -328,7 +328,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	TURNSocket *socket = [[TURNSocket alloc] initWithStream:xmppStream
 													  toJID:transfer.remoteJID
 												  elementID:transfer.uniqueIdentifier
-											  useLocalProxy:YES];
+											  directConnection:YES];
 	transfer.socket = socket;
 	[socket startWithDelegate:transfer delegateQueue:moduleQueue];
 }

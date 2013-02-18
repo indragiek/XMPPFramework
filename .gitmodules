@@ -1,6 +1,3 @@
 [submodule "GCDAsyncSocket"]
 	path = GCDAsyncSocket
 	url = git://github.com/nonatomicdev/GCDAsyncSocket.git
-[submodule "INSOCKSServer"]
-	path = INSOCKSServer
-	url = git@github.com:indragiek/INSOCKSServer.git

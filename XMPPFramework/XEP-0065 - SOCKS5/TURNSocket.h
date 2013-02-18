@@ -4,7 +4,6 @@
 @class XMPPJID;
 @class XMPPStream;
 @class GCDAsyncSocket;
-@class INSOCKSServer;
 @class PortMapper;
 
 /**
@@ -17,6 +16,7 @@
 {
 	int state;
 	BOOL isClient;
+	BOOL isDirect;
 	
 	dispatch_queue_t turnQueue;
 	
@@ -42,7 +42,6 @@
 	NSUInteger streamhostIndex;
 	
 	XMPPJID *proxyJID;
-	INSOCKSServer *proxyServer;
 	PortMapper *portMapper;
 	NSString *proxyHost;
 	UInt16 proxyPort;
@@ -60,7 +59,7 @@
 - (id)initWithStream:(XMPPStream *)stream
 			   toJID:(XMPPJID *)aJid
 		   elementID:(NSString *)elementID
-	   useLocalProxy:(BOOL)useLocalProxy;
+	directConnection:(BOOL)direct;
 
 - (id)initWithStream:(XMPPStream *)stream incomingTURNRequest:(XMPPIQ *)iq;
 
