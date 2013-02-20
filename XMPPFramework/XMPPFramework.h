@@ -22,3 +22,4 @@
 #import <XMPPFramework/XMPPSIFileTransfer.h>
 #import <XMPPFramework/TURNSocket.h>
 #import <XMPPFramework/XMPPInBandBytestream.h>
+#import <XMPPFramework/XMPPReconnect.h>
