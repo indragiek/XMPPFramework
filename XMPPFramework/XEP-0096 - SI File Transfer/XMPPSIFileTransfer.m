@@ -526,6 +526,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 @implementation XMPPSITransfer {
 	GCDAsyncSocket *_asyncSocket;
 	BOOL _transferComplete;
+	NSError *_transferError;
 	NSMutableData *_dataBuffer;
 }
 
@@ -565,7 +566,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	if (_transferComplete) {
 		[self.delegate xmppTransferDidEnd:self];
 	} else {
-		[self.delegate xmppTransfer:self failedWithError:err ?: [self.class asyncSocketDisconnectedError]];
+		[self.delegate xmppTransfer:self failedWithError:_transferError ?: (err ?: [self.class asyncSocketDisconnectedError])];
 	}
 }
 
@@ -585,7 +586,11 @@ static NSArray *_supportedTransferMechanisms = nil;
     [self incrementTransferredBytesBy:[data length]];
     if ([_dataBuffer length] == self.totalBytes) {
         self.data = _dataBuffer;
-        _transferComplete = YES;
+		if ([self.MD5Hash length] && ![self.MD5Hash.lowercaseString isEqualToString:data.md5String.lowercaseString]) {
+			_transferError = [self.class hashMismatchError];
+		} else {
+			_transferComplete = YES;
+		}
         [sock disconnect];
     } else {
         [sock readDataWithTimeout:XMPPSIFileTransferReadTimeout tag:0];
@@ -638,5 +643,10 @@ static NSArray *_supportedTransferMechanisms = nil;
 + (NSError *)asyncSocketDisconnectedError
 {
 	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"Socket disconnected."}];
+}
+
++ (NSError *)hashMismatchError
+{
+	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Expected file hash does not match the hash of the received data."}];
 }
 @end
