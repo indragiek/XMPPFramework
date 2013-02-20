@@ -263,6 +263,18 @@ static NSArray *_supportedTransferMechanisms = nil;
 			[self handleStreamInitiationResult:iq];
 			return YES;
 		}
+	} else if ([iq.type isEqualToString:@"error"]) {
+		__block XMPPSIFileTransfer *transfer = nil;
+		[_outgoingTransfers enumerateKeysAndObjectsUsingBlock:^(NSString *key, XMPPSIFileTransfer *outgoing, BOOL *stop) {
+			if ([key isEqualToString:iq.elementID]) {
+				transfer = outgoing;
+				*stop = YES;
+			}
+		}];
+		if (transfer) {
+			[self handleError:iq forTransfer:transfer];
+			return YES;
+		}
 	}
 	return NO;
 }
@@ -463,6 +475,28 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[bytestream start];
 }
 
+- (void)handleError:(XMPPIQ *)iq forTransfer:(XMPPSITransfer *)transfer
+{
+	NSXMLElement *error = [iq elementForName:@"error"];
+	NSString *errorCode = [error attributeStringValueForName:@"code"];
+	BOOL handledError = NO;
+	if ([errorCode isEqualToString:@"400"]) {
+		if ([error elementForName:@"no-valid-streams" xmlns:XMLNSJabberSI]) {
+			[self transferFailed:transfer error:[self.class noValidStreamsError]];
+			handledError = YES;
+		} else if ([error elementForName:@"bad-profile" xmlns:XMLNSJabberSI]) {
+			[self transferFailed:transfer error:[self.class noValidStreamsError]];
+			handledError = YES;
+		}
+	} else if ([errorCode isEqualToString:@"403"]) {
+		[self transferFailed:transfer error:[self.class offerDeclinedError]];
+		handledError = YES;
+	}
+	if (!handledError) {
+		[self transferFailed:transfer error:[self.class genericTransferFailedError]];
+	}
+}
+
 - (void)sendProfileNotUnderstoodErrorForIQ:(XMPPIQ *)iq
 {
 	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
@@ -519,7 +553,22 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 + (NSError *)noValidStreamsError
 {
-	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"Remote peer did not respond with supported transfer mechanism"}];
+	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:400 userInfo:@{NSLocalizedDescriptionKey : @"Remote peer did not respond with supported transfer mechanism."}];
+}
+
++ (NSError *)profileNotUnderstoodError
+{
+	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:400 userInfo:@{NSLocalizedDescriptionKey : @"Transfer profile not understood."}];
+}
+
++ (NSError *)offerDeclinedError
+{
+	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:403 userInfo:@{NSLocalizedDescriptionKey : @"Transfer offer declined."}];
+}
+
++ (NSError *)genericTransferFailedError
+{
+	return [NSError errorWithDomain:XMPPSIFileTransferErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"File transfer failed."}];
 }
 @end
 
@@ -590,8 +639,12 @@ static NSArray *_supportedTransferMechanisms = nil;
     [self incrementTransferredBytesBy:[data length]];
     if ([_dataBuffer length] == self.totalBytes) {
         self.data = _dataBuffer;
-		if ([self.MD5Hash length] && ![self.MD5Hash.lowercaseString isEqualToString:data.md5String.lowercaseString]) {
-			_transferError = [self.class hashMismatchError];
+		if ([self.MD5Hash length]) {
+			if (![self.MD5Hash.lowercaseString isEqualToString:data.md5String.lowercaseString]) {
+				_transferError = [self.class hashMismatchError];
+			} else {
+				_transferComplete = YES;
+			}
 		} else {
 			_transferComplete = YES;
 		}
