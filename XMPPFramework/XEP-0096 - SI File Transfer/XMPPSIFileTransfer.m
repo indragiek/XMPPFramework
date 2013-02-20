@@ -547,7 +547,11 @@ static NSArray *_supportedTransferMechanisms = nil;
 	[_asyncSocket setDelegateQueue:dispatch_get_current_queue()];
 	if (self.outgoing) {
 		// -1 timeout means no time out. See GCDAsyncSocket docs for more information.
-		[_asyncSocket writeData:self.data withTimeout:-1 tag:0];
+		NSData *fileData = self.data;
+		if (self.dataRange.length) {
+			fileData = [fileData subdataWithRange:self.dataRange];
+		}
+		[_asyncSocket writeData:fileData withTimeout:-1 tag:0];
 	} else {
 		_dataBuffer = [NSMutableData data];
 		[_asyncSocket readDataWithTimeout:XMPPSIFileTransferReadTimeout tag:0];

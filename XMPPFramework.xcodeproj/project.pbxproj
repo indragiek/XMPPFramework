@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0315B1EC16D198F80007A0FA /* PortMapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 0315B1EA16D198F80007A0FA /* PortMapper.h */; };
 		0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 0315B1EB16D198F80007A0FA /* PortMapper.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		032D3C5F16D4B23B009E5AD8 /* XMPPReconnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D3C5D16D4B23B009E5AD8 /* XMPPReconnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		032D3C6016D4B23B009E5AD8 /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D3C5E16D4B23B009E5AD8 /* XMPPReconnect.m */; };
 		032D586316C158A1009577E1 /* XMPPCapabilities.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 032D585A16C158A1009577E1 /* XMPPCapabilities.xcdatamodel */; };
 		032D586416C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		032D586516C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D585C16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m */; };
@@ -145,6 +147,8 @@
 /* Begin PBXFileReference section */
 		0315B1EA16D198F80007A0FA /* PortMapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PortMapper.h; path = "XMPPFramework/XEP-0065 - SOCKS5/PortMapper.h"; sourceTree = "<group>"; };
 		0315B1EB16D198F80007A0FA /* PortMapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PortMapper.m; path = "XMPPFramework/XEP-0065 - SOCKS5/PortMapper.m"; sourceTree = "<group>"; };
+		032D3C5D16D4B23B009E5AD8 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
+		032D3C5E16D4B23B009E5AD8 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		032D585A16C158A1009577E1 /* XMPPCapabilities.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPCapabilities.xcdatamodel; sourceTree = "<group>"; };
 		032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCapabilitiesCoreDataStorage.h; sourceTree = "<group>"; };
 		032D585C16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPCapabilitiesCoreDataStorage.m; sourceTree = "<group>"; };
@@ -313,6 +317,15 @@
 			name = PortMapper;
 			sourceTree = "<group>";
 		};
+		032D3C5C16D4B23B009E5AD8 /* Reconnect */ = {
+			isa = PBXGroup;
+			children = (
+				032D3C5D16D4B23B009E5AD8 /* XMPPReconnect.h */,
+				032D3C5E16D4B23B009E5AD8 /* XMPPReconnect.m */,
+			);
+			path = Reconnect;
+			sourceTree = "<group>";
+		};
 		032D585816C158A1009577E1 /* XEP-0115 - Capabilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -424,6 +437,7 @@
 				039366CA169D26B300986388 /* Categories */,
 				039366D4169D26B300986388 /* LibIDN */,
 				039366DE169D26B300986388 /* Roster */,
+				032D3C5C16D4B23B009E5AD8 /* Reconnect */,
 				039366EC169D26B400986388 /* Utilities */,
 				032D586C16C158AB009577E1 /* Core Data */,
 				038C016D16C18E8500DC2924 /* XEP-0092 - Software Version */,
@@ -801,6 +815,7 @@
 				03B9E8F116C8B4C2002F2730 /* TURNSocket.h in Headers */,
 				0371704516CA05F500EDE221 /* XMPPInBandBytestream.h in Headers */,
 				0315B1EC16D198F80007A0FA /* PortMapper.h in Headers */,
+				032D3C5F16D4B23B009E5AD8 /* XMPPReconnect.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -924,6 +939,7 @@
 				03B9E8F216C8B4C2002F2730 /* TURNSocket.m in Sources */,
 				0371704616CA05F500EDE221 /* XMPPInBandBytestream.m in Sources */,
 				0315B1ED16D198F80007A0FA /* PortMapper.m in Sources */,
+				032D3C6016D4B23B009E5AD8 /* XMPPReconnect.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
