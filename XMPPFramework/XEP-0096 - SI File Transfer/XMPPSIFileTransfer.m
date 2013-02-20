@@ -264,8 +264,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 			return YES;
 		}
 	} else if ([iq.type isEqualToString:@"error"]) {
-		__block XMPPSIFileTransfer *transfer = nil;
-		[_outgoingTransfers enumerateKeysAndObjectsUsingBlock:^(NSString *key, XMPPSIFileTransfer *outgoing, BOOL *stop) {
+		__block XMPPSITransfer *transfer = nil;
+		[_outgoingTransfers enumerateKeysAndObjectsUsingBlock:^(NSString *key, XMPPSITransfer *outgoing, BOOL *stop) {
 			if ([key isEqualToString:iq.elementID]) {
 				transfer = outgoing;
 				*stop = YES;
