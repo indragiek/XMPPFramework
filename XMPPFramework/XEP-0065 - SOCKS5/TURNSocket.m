@@ -488,7 +488,6 @@ static NSMutableArray *proxyCandidates;
 	XMPPIQ *iq = [XMPPIQ iqWithType:@"set" to:jid elementID:uuid child:query];
 	
 	[xmppStream sendElement:iq];
-	NSLog(@"Sending request: %@", iq.prettyXMLString);
 	
 	// Update state
 	state = STATE_REQUEST_SENT;
@@ -578,7 +577,6 @@ static NSMutableArray *proxyCandidates;
 **/
 - (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
 {
-	NSLog(@"RECEIVED IQ: %@", iq.prettyXMLString);
 	// Catch errors and fail
 	if ([[iq type] isEqualToString:@"error"] && ([iq.elementID isEqualToString:uuid] || [iq.elementID isEqualToString:discoUUID])) {
 		[self fail];
@@ -767,7 +765,6 @@ static NSMutableArray *proxyCandidates;
 {
 	XMPPLogTrace();
 	// Target has replied - hopefully they've been able to connect to one of the streamhosts
-	NSLog(@"RESPONSE: %@", iq);
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:@"http://jabber.org/protocol/bytestreams"];
 	NSXMLElement *streamhostUsed = [query elementForName:@"streamhost-used"];
 	
@@ -1414,7 +1411,6 @@ static NSMutableArray *proxyCandidates;
 				// Version = 5 (for SOCKS5)
 				// Method  = 0 (No authentication, anonymous access)
 				NSData *reply = [NSData dataWithBytes:"\x05\x00" length:2];
-				NSLog(@"SOCKS_DIRECT_CONNECT SUCCESSFUL");
 				[asyncSocket writeData:reply withTimeout:-1 tag:SOCKS_DIRECT_CONNECT_REPLY_1];
 				[asyncSocket readDataToLength:5 withTimeout:TIMEOUT_READ tag:SOCKS_DIRECT_CONNECT_REPLY_1];
 			} else {
@@ -1473,7 +1469,7 @@ static NSMutableArray *proxyCandidates;
 			// Address      = P:D (P=LengthOfDomain D=DomainWithoutNullTermination)
 			// Port         = 0
 			NSMutableData *response = [NSMutableData dataWithBytes:"\x05\x00\x00\x03" length:4];
-			UInt8 hashLength = (UInt8)[data length];
+			UInt8 hashLength = (UInt8)[hashData length];
 			[response appendBytes:&hashLength length:1];
 			[response appendData:hashData];
 			UInt16 port = 0;

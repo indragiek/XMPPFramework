@@ -586,7 +586,7 @@ static NSArray *_supportedTransferMechanisms = nil;
     if ([_dataBuffer length] == self.totalBytes) {
         self.data = _dataBuffer;
         _transferComplete = YES;
-        [self.delegate xmppTransferDidEnd:self];
+        [sock disconnect];
     } else {
         [sock readDataWithTimeout:XMPPSIFileTransferReadTimeout tag:0];
     }

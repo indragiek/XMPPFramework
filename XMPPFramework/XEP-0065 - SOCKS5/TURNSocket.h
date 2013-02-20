@@ -48,7 +48,6 @@
 	UInt16 proxyPort;
 	
 	GCDAsyncSocket *asyncSocket;
-	NSMutableArray *socketConnections;
 	
 	NSDate *startTime, *finishTime;
 }
