@@ -10,7 +10,8 @@
 static NSString* const XMPPMessageElementBody = @"body";
 static NSString* const XMPPMessageElementNSBody = @"http://www.w3.org/1999/xhtml";
 static NSString* const XMPPMessageElementHTML = @"html";
-static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/xhtml-im";
+NSString* const XMLNSJabberXHTMLIM = @"http://jabber.org/protocol/xhtml-im";
+
 
 @interface NSColor (HexColors)
 // Code rom this Apple technote <http://developer.apple.com/library/mac/#qa/qa1576/_index.html>
@@ -20,16 +21,16 @@ static NSString* const XMPPMessageElementNSHTML = @"http://jabber.org/protocol/x
 @implementation XMPPMessage (XEP_0071)
 - (NSString *)HTMLBody
 {
-	NSXMLElement *html = [self elementForName:XMPPMessageElementHTML xmlns:XMPPMessageElementNSHTML];
+	NSXMLElement *html = [self elementForName:XMPPMessageElementHTML xmlns:XMLNSJabberXHTMLIM];
 	NSXMLElement *body = [html elementForName:XMPPMessageElementBody xmlns:XMPPMessageElementNSBody];
 	return [body XMLString];
 }
 
 - (void)setHTMLBodyWithAttributedString:(NSAttributedString *)attributedBody
 {
-	NSXMLElement *html = [self elementForName:XMPPMessageElementHTML xmlns:XMPPMessageElementNSHTML];
+	NSXMLElement *html = [self elementForName:XMPPMessageElementHTML xmlns:XMLNSJabberXHTMLIM];
 	if (!html) {
-		html = [NSXMLElement elementWithName:XMPPMessageElementHTML xmlns:XMPPMessageElementNSHTML];
+		html = [NSXMLElement elementWithName:XMPPMessageElementHTML xmlns:XMLNSJabberXHTMLIM];
 		[self addChild:html];
 	}
 	NSXMLElement *body = [html elementForName:XMPPMessageElementBody xmlns:XMPPMessageElementNSBody];

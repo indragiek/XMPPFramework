@@ -3,6 +3,8 @@
 
 #define _XMPP_PING_H
 
+extern NSString* const XMLNSXMPPPing;
+
 @class XMPPIDTracker;
 
 

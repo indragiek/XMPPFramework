@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import "XMPPMessage.h"
 
+extern NSString* const XMLNSJabberChatStates;
 
 @interface XMPPMessage (XEP_0085)
 
