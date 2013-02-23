@@ -467,16 +467,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 		{
 			SCNetworkReachabilityContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
 			SCNetworkReachabilitySetCallback(reachability, ReachabilityChanged, &context);
-			
-			CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
-			if (xmppRunLoop)
-			{
-				SCNetworkReachabilityScheduleWithRunLoop(reachability, xmppRunLoop, kCFRunLoopDefaultMode);
-			}
-			else
-			{
-				XMPPLogWarn(@"%@: %@ - No xmpp run loop available!", THIS_FILE, THIS_METHOD);
-			}
+			SCNetworkReachabilitySetDispatchQueue(reachability, moduleQueue);
 		}
 	}
 }
@@ -487,16 +478,7 @@ static void ReachabilityChanged(SCNetworkReachabilityRef target, SCNetworkReacha
 	
 	if (reachability)
 	{
-		CFRunLoopRef xmppRunLoop = [[xmppStream xmppUtilityRunLoop] getCFRunLoop];
-		if (xmppRunLoop)
-		{
-			SCNetworkReachabilityUnscheduleFromRunLoop(reachability, xmppRunLoop, kCFRunLoopDefaultMode);
-		}
-		else
-		{
-			XMPPLogWarn(@"%@: %@ - No xmpp run loop available!", THIS_FILE, THIS_METHOD);
-		}
-		
+		SCNetworkReachabilitySetDispatchQueue(reachability, NULL);
 		SCNetworkReachabilitySetCallback(reachability, NULL, NULL);
 		CFRelease(reachability);
 		reachability = NULL;
