@@ -130,6 +130,18 @@
 	[bodyElement setStringValue:body];
 }
 
+- (NSString *)type
+{
+	return [self attributeStringValueForName:@"type"];
+}
+
+- (void)setType:(NSString *)type
+{
+	if (!type) return;
+	[self removeAttributeForName:@"type"];
+	[self addAttributeWithName:@"type" stringValue:type];
+}
+
 - (XMPPJID *)from
 {
 	NSString *from = [self attributeStringValueForName:@"from"];
