@@ -56,7 +56,7 @@ NSString* const XMLNSJabberXHTMLIM = @"http://jabber.org/protocol/xhtml-im";
 	NSFont *font = [attr objectForKey:NSFontAttributeName];
 	if (font) {
 		[style appendFormat:@"font-family: %@;", [font familyName]];
-		[style appendFormat:@"font-size: %ldpt", (NSInteger)[font pointSize]];
+		[style appendFormat:@"font-size: %ldpt;", (NSInteger)[font pointSize]];
 		NSFontTraitMask traits = [[NSFontManager sharedFontManager] traitsOfFont:font];
 		if (traits & NSItalicFontMask) {
 			[style appendString:@"font-style: italic;"];
