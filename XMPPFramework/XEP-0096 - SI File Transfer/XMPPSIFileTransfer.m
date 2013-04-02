@@ -62,7 +62,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 @implementation XMPPSIFileTransfer {
 	NSMutableDictionary *_outgoingTransfers;
 	NSMutableDictionary *_incomingTransfers;
-	NSMutableArray *_activeTransfers;
+	NSMutableSet *_activeTransfers;
 }
 
 + (void)load
@@ -77,7 +77,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	if ((self = [super initWithDispatchQueue:queue])) {
 		_outgoingTransfers = [NSMutableDictionary dictionary];
 		_incomingTransfers = [NSMutableDictionary dictionary];
-		_activeTransfers = [NSMutableArray array];
+		_activeTransfers = [NSMutableSet set];
 	}
 	return self;
 }
