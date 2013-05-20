@@ -21,27 +21,25 @@ static NSArray *_permittedElementList = nil;
 	NSArray *elements = @[XMPPChatStateActive, XMPPChatStateComposing, XMPPChatStatePaused, XMPPChatStateInactive, XMPPChatStateGone];
 	
 	NSMutableArray *permitted = [NSMutableArray arrayWithCapacity:elements.count * _prefixes.count];
-	[elements enumerateObjectsUsingBlock:^(NSString *element, NSUInteger idx, BOOL *stop) {
-		[_prefixes enumerateObjectsUsingBlock:^(NSString *prefix, NSUInteger idx1, BOOL *stop1) {
+	for (NSString *element in elements) {
+		for (NSString *prefix in _prefixes) {
 			[permitted addObject:[prefix stringByAppendingString:element]];
-		}];
-	}];
+		}
+	}
 	_permittedElementList = permitted;
 }
 
 - (BOOL)hasChatState
 {
-	__block BOOL hasChatState = NO;
-	[self.children enumerateObjectsUsingBlock:^(NSXMLNode *node, NSUInteger idx, BOOL *stop) {
+	for (NSXMLNode *node in self.children) {
 		if ([node isKindOfClass:[NSXMLElement class]]) {
 			NSXMLElement *element = (NSXMLElement *)node;
 			if ([_permittedElementList containsObject:element.name]) {
-				hasChatState = YES;
-				*stop = YES;
+				return YES;
 			}
 		}
-	}];
-	return hasChatState;
+	}
+	return NO;
 }
 
 - (BOOL)isActiveChatState
@@ -98,24 +96,22 @@ static NSArray *_permittedElementList = nil;
 
 - (BOOL)hasChatStateElementsForName:(NSString *)name
 {
-	__block BOOL hasChatState = NO;
-	[_prefixes enumerateObjectsUsingBlock:^(NSString *prefix, NSUInteger idx, BOOL *stop) {
+	for (NSString *prefix in _prefixes) {
 		NSString *elementName = [prefix stringByAppendingString:name];
 		if ([self elementForName:elementName xmlns:XMLNSJabberChatStates]) {
-			hasChatState = YES;
-			*stop = YES;
+			return YES;
 		}
-	}];
-	return hasChatState;
+	}
+	return NO;
 }
 
 - (void)addChatStateElementsForName:(NSString *)name
 {
-	[_prefixes enumerateObjectsUsingBlock:^(NSString *prefix, NSUInteger idx, BOOL *stop) {
+	for (NSString *prefix in _prefixes) {
 		NSString *elementName = [prefix stringByAppendingString:name];
 		NSXMLElement *child = [NSXMLElement elementWithName:elementName xmlns:XMLNSJabberChatStates];
 		[self addChild:child];
-	}];
+	}
 }
 
 @end
