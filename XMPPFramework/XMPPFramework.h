@@ -23,3 +23,11 @@
 #import <XMPPFramework/TURNSocket.h>
 #import <XMPPFramework/XMPPInBandBytestream.h>
 #import <XMPPFramework/XMPPReconnect.h>
+
+// Logging
+#import <XMPPFramework/DDAbstractDatabaseLogger.h>
+#import <XMPPFramework/DDASLLogger.h>
+#import <XMPPFramework/DDLog.h>
+#import <XMPPFramework/DDTTYLogger.h>
+#import <XMPPFramework/DDFileLogger.h>
+#import <XMPPFramework/DispatchQueueLogFormatter.h>
