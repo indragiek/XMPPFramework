@@ -107,11 +107,8 @@ static NSArray *_permittedElementList = nil;
 
 - (void)addChatStateElementsForName:(NSString *)name
 {
-	for (NSString *prefix in _prefixes) {
-		NSString *elementName = [prefix stringByAppendingString:name];
-		NSXMLElement *child = [NSXMLElement elementWithName:elementName xmlns:XMLNSJabberChatStates];
-		[self addChild:child];
-	}
+	NSXMLElement *child = [NSXMLElement elementWithName:name xmlns:XMLNSJabberChatStates];
+	[self addChild:child];
 }
 
 @end
