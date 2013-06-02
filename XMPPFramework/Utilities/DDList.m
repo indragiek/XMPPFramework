@@ -64,15 +64,16 @@
 	DDListNode *node = listHead;
 	while (node != NULL)
 	{
+		DDListNode *nextNode = node->next;
 		if (element == node->element)
 		{
 			// Remove the node from the list.
 			// This is done by editing the pointers of the node's neighbors to skip it.
-			// 
+			//
 			// In other words:
 			// node->prev->next = node->next
 			// node->next->prev = node->prev
-			// 
+			//
 			// We also want to properly update our list pointer,
 			// which always points to the "first" element in the list. (Most recently added.)
             
@@ -90,10 +91,7 @@
 			
 			if (!allInstances) break;
 		}
-		else
-		{
-			node = node->next;
-		}
+		node = nextNode;
 	}
 }
 
@@ -245,7 +243,7 @@
 				{
 					elements[i] = node->element;
 					node = node->prev;
-				}			
+				}
 			}
 			else
 			{
