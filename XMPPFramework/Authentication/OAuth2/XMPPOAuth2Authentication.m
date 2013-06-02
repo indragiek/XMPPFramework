@@ -1,4 +1,12 @@
-#import "XMPPPlainAuthentication.h"
+//
+//  XMPPOAuth2Authentication.m
+//  XMPPFramework
+//
+//  Created by Indragie Karunaratne on 2013-06-02.
+//  Copyright (c) 2013 nonatomic. All rights reserved.
+//
+
+#import "XMPPOAuth2Authentication.h"
 #import "XMPP.h"
 #import "XMPPLogging.h"
 #import "XMPPInternal.h"
@@ -11,26 +19,25 @@
 
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
 #else
-  static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
-
-@implementation XMPPPlainAuthentication
+@implementation XMPPOAuth2Authentication
 {
-  #if __has_feature(objc_arc_weak)
+#if __has_feature(objc_arc_weak)
 	__weak XMPPStream *xmppStream;
-  #else
+#else
 	__unsafe_unretained XMPPStream *xmppStream;
-  #endif
+#endif
 	
 	NSString *password;
 }
 
 + (NSString *)mechanismName
 {
-	return @"PLAIN";
+	return @"X-OAUTH2";
 }
 
 - (id)initWithStream:(XMPPStream *)stream password:(NSString *)inPassword
@@ -47,13 +54,6 @@
 {
 	XMPPLogTrace();
 	
-	// From RFC 4616 - PLAIN SASL Mechanism:
-	// [authzid] UTF8NUL authcid UTF8NUL passwd
-	// 
-	// authzid: authorization identity
-	// authcid: authentication identity (username)
-	// passwd : password for authcid
-	
 	NSString *username = [xmppStream.myJID user];
 	
 	NSString *payload = [NSString stringWithFormat:@"\0%@\0%@", username, password];
@@ -63,6 +63,8 @@
 	
 	NSXMLElement *auth = [NSXMLElement elementWithName:@"auth" xmlns:@"urn:ietf:params:xml:ns:xmpp-sasl"];
 	[auth addAttributeWithName:@"mechanism" stringValue:[self.class mechanismName]];
+	[auth addAttributeWithName:@"auth:service" stringValue:@"oauth2"];
+	[auth addAttributeWithName:@"xmlns:auth" stringValue:@"http://www.google.com/talk/protocol/auth"];
 	[auth setStringValue:base64];
 	
 	[xmppStream sendAuthElement:auth];
@@ -89,15 +91,11 @@
 
 @end
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark -
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+@implementation XMPPStream (XMPPOAuth2Authentication)
 
-@implementation XMPPStream (XMPPPlainAuthentication)
-
-- (BOOL)supportsPlainAuthentication
+- (BOOL)supportsOAuth2Authentication
 {
-	return [self supportsAuthenticationMechanism:[XMPPPlainAuthentication mechanismName]];
+	return [self supportsAuthenticationMechanism:[XMPPOAuth2Authentication mechanismName]];
 }
 
 @end

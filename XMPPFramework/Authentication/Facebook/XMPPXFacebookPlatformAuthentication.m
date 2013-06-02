@@ -12,9 +12,9 @@
 
 // Log levels: off, error, warn, info, verbose
 #if DEBUG
-    static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_INFO; // | XMPP_LOG_FLAG_TRACE;
 #else
-    static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
+static const int xmppLogLevel = XMPP_LOG_LEVEL_WARN;
 #endif
 
 static NSString *const XMPPFacebookChatHostName = @"chat.facebook.com";
@@ -23,11 +23,11 @@ static char facebookAppIdKey;
 
 @interface XMPPXFacebookPlatformAuthentication ()
 {
-  #if __has_feature(objc_arc_weak)
+#if __has_feature(objc_arc_weak)
 	__weak XMPPStream *xmppStream;
-  #else
+#else
 	__unsafe_unretained XMPPStream *xmppStream;
-  #endif
+#endif
 	
 	BOOL awaitingChallenge;
 	
@@ -177,10 +177,10 @@ static char facebookAppIdKey;
 		if (separator.location != NSNotFound)
 		{
 			NSString *key = [[component substringToIndex:separator.location]
-			                    stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+							 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 			
 			NSString *value = [[component substringFromIndex:separator.location+1]
-			                      stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+							   stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 			
 			if ([value hasPrefix:@"\""] && [value hasSuffix:@"\""] && [value length] > 2)
 			{
@@ -237,7 +237,7 @@ static char facebookAppIdKey;
 		// As of October 8, 2011, Facebook doesn't have their XMPP SRV records set.
 		// And, as per the XMPP specification, we MUST check the XMPP SRV records for an IP address,
 		// before falling back to a traditional A record lookup.
-		// 
+		//
 		// So we're setting the hostname as a minor optimization to avoid the SRV timeout delay.
 		
 		self.hostName = XMPPFacebookChatHostName;
@@ -252,8 +252,8 @@ static char facebookAppIdKey;
 	dispatch_block_t block = ^{
 		result = objc_getAssociatedObject(self, &facebookAppIdKey);
 	};
-
-	if (dispatch_get_specific(self.xmppQueueTag))
+	
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);
@@ -269,7 +269,7 @@ static char facebookAppIdKey;
 		objc_setAssociatedObject(self, &facebookAppIdKey, newFacebookAppId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	};
 	
-	if (dispatch_get_specific(self.xmppQueueTag))
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
 		dispatch_async(self.xmppQueue, block);
@@ -281,9 +281,9 @@ static char facebookAppIdKey;
 }
 
 /**
- * This method attempts to connect to the Facebook Chat servers 
+ * This method attempts to connect to the Facebook Chat servers
  * using the Facebook OAuth token returned by the Facebook OAuth 2.0 authentication process.
-**/
+ **/
 - (BOOL)authenticateWithFacebookAccessToken:(NSString *)accessToken error:(NSError **)errPtr
 {
 	XMPPLogTrace();
@@ -296,9 +296,9 @@ static char facebookAppIdKey;
 		if ([self supportsXFacebookPlatformAuthentication])
 		{
 			XMPPXFacebookPlatformAuthentication *facebookAuth =
-			    [[XMPPXFacebookPlatformAuthentication alloc] initWithStream:self
-			                                                          appId:self.facebookAppId
-			                                                    accessToken:accessToken];
+			[[XMPPXFacebookPlatformAuthentication alloc] initWithStream:self
+																  appId:self.facebookAppId
+															accessToken:accessToken];
 			
 			result = [self authenticate:facebookAuth error:&err];
 		}
@@ -313,7 +313,8 @@ static char facebookAppIdKey;
 		}
 	}};
 	
-	if (dispatch_get_specific(self.xmppQueueTag))
+	
+	if (dispatch_get_current_queue() == self.xmppQueue)
 		block();
 	else
 		dispatch_sync(self.xmppQueue, block);
