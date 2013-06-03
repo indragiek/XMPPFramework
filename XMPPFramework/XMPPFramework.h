@@ -25,14 +25,6 @@
 #import <XMPPFramework/XMPPInBandBytestream.h>
 #import <XMPPFramework/XMPPReconnect.h>
 
-// Authentication
-#import <XMPPFramework/XMPPPlainAuthentication.h>
-#import <XMPPFramework/XMPPOAuth2Authentication.h>
-#import <XMPPFramework/XMPPXFacebookPlatformAuthentication.h>
-#import <XMPPFramework/XMPPDeprecatedDigestAuthentication.h>
-#import <XMPPFramework/XMPPDeprecatedPlainAuthentication.h>
-#import <XMPPFramework/XMPPDigestMD5Authentication.h>
-
 // Logging
 #import <XMPPFramework/DDAbstractDatabaseLogger.h>
 #import <XMPPFramework/DDASLLogger.h>

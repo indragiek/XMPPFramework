@@ -1812,7 +1812,13 @@ enum XMPPStreamConfig
 		
 		id <XMPPSASLAuthentication> someAuth = nil;
 		
-		if ([self supportsDigestMD5Authentication])
+		if ([self supportsOAuth2Authentication]) {
+			someAuth = [[XMPPOAuth2Authentication alloc] initWithStream:self password:password];
+		}
+		else if ([self supportsXFacebookPlatformAuthentication]) {
+			result = [self authenticateWithFacebookAccessToken:password error:&err];
+		}
+		else if ([self supportsDigestMD5Authentication])
 		{
 			someAuth = [[XMPPDigestMD5Authentication alloc] initWithStream:self password:password];
 			result = [self authenticate:someAuth error:&err];

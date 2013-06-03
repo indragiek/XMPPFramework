@@ -19,6 +19,8 @@
 #import "XMPPPlainAuthentication.h"
 #import "XMPPDeprecatedPlainAuthentication.h"
 #import "XMPPDeprecatedDigestAuthentication.h"
+#import "XMPPOAuth2Authentication.h"
+#import "XMPPXFacebookPlatformAuthentication.h"
 
 // 
 // Categories
