@@ -30,6 +30,7 @@
 	
 	BOOL autoFetchHashedCapabilities;
 	BOOL autoFetchNonHashedCapabilities;
+	BOOL autoFetchMyServerCapabilities;
 	
 	NSTimeInterval capabilitiesRequestTimeout;
 	
@@ -70,6 +71,15 @@
  * You may always fetch the capabilities (if/when needed) via the fetchCapabilitiesForJID method.
 **/
 @property (assign) BOOL autoFetchNonHashedCapabilities;
+
+/**
+ * Auto fetch the capabilities of the server upon authentication.
+ * This uses the non hashed approach outlined in XEP-0030: Service Discovery.
+ *
+ * The default value is NO.
+**/
+
+@property (assign) BOOL autoFetchMyServerCapabilities;
 
 /**
  * Manually fetch the capabilities for the given jid.
@@ -335,6 +345,14 @@
  * However, if the capabilities change, the recollectMyCapabilities method may be used to perform a manual update.
 **/
 - (void)xmppCapabilities:(XMPPCapabilities *)sender collectingMyCapabilities:(NSXMLElement *)query;
+
+
+/**
+ * Use this delegate method to return the feature you want to have in your capabilities e.g. @[@"urn:xmpp:archive"]
+ * Duplicate features are automatically discarded
+ * For more control over your capablities use xmppCapabilities:collectingMyCapabilities:
+**/
+- (NSArray *)myFeaturesForXMPPCapabilities:(XMPPCapabilities *)sender;
 
 /**
  * Invoked when capabilities have been discovered for an available JID.

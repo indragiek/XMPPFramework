@@ -58,7 +58,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		#if !OS_OBJECT_USE_OBJC
 		dispatch_retain(delegateQueue);
 		#endif
-		
+
 		if (rq)
 		{
 			resolverQueue = rq;
@@ -70,6 +70,9 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		{
 			resolverQueue = dispatch_queue_create("XMPPSRVResolver", NULL);
 		}
+		
+		resolverQueueTag = &resolverQueueTag;
+		dispatch_queue_set_specific(resolverQueue, resolverQueueTag, resolverQueueTag, NULL);
 		
 		results = [[NSMutableArray alloc] initWithCapacity:2];
 	}
@@ -103,7 +106,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		result = [srvName copy];
 	};
 	
-	if (dispatch_get_current_queue() == resolverQueue)
+	if (dispatch_get_specific(resolverQueueTag))
 		block();
 	else
 		dispatch_sync(resolverQueue, block);
@@ -119,7 +122,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 		result = timeout;
 	};
 	
-	if (dispatch_get_current_queue() == resolverQueue)
+	if (dispatch_get_specific(resolverQueueTag))
 		block();
 	else
 		dispatch_sync(resolverQueue, block);
@@ -133,7 +136,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 - (void)sortResults
 {
-	NSAssert(dispatch_get_current_queue() == resolverQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(resolverQueueTag), @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -259,7 +262,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 - (void)succeed
 {
-	NSAssert(dispatch_get_current_queue() == resolverQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(resolverQueueTag), @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -288,7 +291,7 @@ NSString *const XMPPSRVResolverErrorDomain = @"XMPPSRVResolverErrorDomain";
 
 - (void)failWithError:(NSError *)error
 {
-	NSAssert(dispatch_get_current_queue() == resolverQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(resolverQueueTag), @"Invoked on incorrect queue");
 	
 	XMPPLogTrace2(@"%@: %@ %@", THIS_FILE, THIS_METHOD, error);
 	
@@ -400,9 +403,9 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 	// It does some preliminary work, but the bulk of the interesting stuff 
 	// is done in the processRecord:length: method.
 	
-    XMPPSRVResolver *resolver = (__bridge XMPPSRVResolver *)context;
+	XMPPSRVResolver *resolver = (__bridge XMPPSRVResolver *)context;
 	
-	NSCAssert(dispatch_get_current_queue() == resolver->resolverQueue, @"Invoked on incorrect queue");
+	NSCAssert(dispatch_get_specific(resolver->resolverQueueTag), @"Invoked on incorrect queue");
     
 	XMPPLogCTrace();
 	
@@ -554,7 +557,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		resolveInProgress = YES;
 	}};
 	
-	if (dispatch_get_current_queue() == resolverQueue)
+	if (dispatch_get_specific(resolverQueueTag))
 		block();
 	else
 		dispatch_async(resolverQueue, block);
@@ -601,7 +604,7 @@ static void QueryRecordCallback(DNSServiceRef       sdRef,
 		resolveInProgress = NO;
 	}};
 	
-	if (dispatch_get_current_queue() == resolverQueue)
+	if (dispatch_get_specific(resolverQueueTag))
 		block();
 	else
 		dispatch_sync(resolverQueue, block);

@@ -16,10 +16,10 @@
 #endif
 
 #define AssertPrivateQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private method: MUST run on parentQueue");
 
 #define AssertParentQueue() \
-        NSAssert(dispatch_get_current_queue() == parentQueue, @"Private protocol method: MUST run on parentQueue");
+        NSAssert(dispatch_get_specific(parentQueueTag), @"Private protocol method: MUST run on parentQueue");
 
 @interface XMPPRosterMemoryStorage ()
 
@@ -56,6 +56,8 @@
 		{
 			parent = aParent;
 			parentQueue = queue;
+			parentQueueTag = &parentQueueTag;
+			dispatch_queue_set_specific(parentQueue, parentQueueTag, parentQueueTag, NULL);
 			
 			#if !OS_OBJECT_USE_OBJC
 			dispatch_retain(parentQueue);
@@ -268,7 +270,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return myUser;
 	}
@@ -294,7 +296,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return (XMPPResourceMemoryStorageObject *)[myUser resourceForJID:myJID];
 	}
@@ -322,7 +324,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _userForJID:jid];
 	}
@@ -351,7 +353,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _resourceForJID:jid];
 	}
@@ -380,7 +382,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUsersByName];
 	}
@@ -410,7 +412,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUsersByAvailabilityName];
 	}
@@ -440,7 +442,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedAvailableUsersByName];
 	}
@@ -469,7 +471,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedUnavailableUsersByName];
 	}
@@ -498,7 +500,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedUsers];
 	}
@@ -527,7 +529,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedAvailableUsers];
 	}
@@ -556,7 +558,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _unsortedUnavailableUsers];
 	}
@@ -585,7 +587,7 @@
 		return nil;
 	}
 	
-	if (dispatch_get_current_queue() == parentQueue)
+	if (dispatch_get_specific(parentQueueTag))
 	{
 		return [self _sortedResources:includeResourcesForMyUserExcludingMyself];
 	}
@@ -717,7 +719,7 @@
 			
 			user = myUser;
 		}
-		else
+		else if([parent allowRosterlessOperation])
 		{
 			// Unknown user (this is the first time we've encountered them).
 			// This happens if the roster is in rosterlessOperation mode.
@@ -797,6 +799,21 @@
 	myUser = nil;
 	
 	[[self multicastDelegate] xmppRosterDidChange:self];
+}
+
+- (NSArray *)jidsForXMPPStream:(XMPPStream *)stream
+{
+    XMPPLogTrace();
+	AssertParentQueue();
+	
+    NSMutableArray *results = [NSMutableArray array];
+    
+	for (XMPPUserMemoryStorageObject *user in [roster objectEnumerator])
+	{
+        [results addObject:[user.jid bareJID]];
+	}
+    
+    return results;
 }
 
 @end

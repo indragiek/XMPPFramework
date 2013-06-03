@@ -1,14 +1,24 @@
 #import "XMPPIDTracker.h"
+#import "XMPPElement.h"
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-#define AssertProperQueue() NSAssert(dispatch_get_current_queue() == queue, @"Invoked on incorrect queue")
+#define AssertProperQueue() NSAssert(dispatch_get_specific(queueTag), @"Invoked on incorrect queue")
+
+const NSTimeInterval XMPPIDTrackerTimeoutNone = -1;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface XMPPIDTracker ()
+{
+	void *queueTag;
+}
+
+@end
 
 @implementation XMPPIDTracker
 
@@ -26,6 +36,10 @@
 	if ((self = [super init]))
 	{
 		queue = aQueue;
+		
+		queueTag = &queueTag;
+		dispatch_queue_set_specific(queue, queueTag, queueTag, NULL);
+		
 		#if !OS_OBJECT_USE_OBJC
 		dispatch_retain(queue);
 		#endif
@@ -60,6 +74,16 @@
 	[self addID:elementID trackingInfo:trackingInfo];
 }
 
+- (void)addElement:(XMPPElement *)element target:(id)target selector:(SEL)selector timeout:(NSTimeInterval)timeout
+{
+	AssertProperQueue();
+	
+	XMPPBasicTrackingInfo *trackingInfo;
+	trackingInfo = [[XMPPBasicTrackingInfo alloc] initWithTarget:target selector:selector timeout:timeout];
+	
+	[self addElement:element trackingInfo:trackingInfo];
+}
+
 - (void)addID:(NSString *)elementID
         block:(void (^)(id obj, id <XMPPTrackingInfo> info))block
       timeout:(NSTimeInterval)timeout
@@ -72,6 +96,19 @@
 	[self addID:elementID trackingInfo:trackingInfo];
 }
 
+
+- (void)addElement:(XMPPElement *)element 
+             block:(void (^)(id obj, id <XMPPTrackingInfo> info))block
+           timeout:(NSTimeInterval)timeout
+{
+	AssertProperQueue();
+	
+	XMPPBasicTrackingInfo *trackingInfo;
+	trackingInfo = [[XMPPBasicTrackingInfo alloc] initWithBlock:block timeout:timeout];
+	
+	[self addElement:element trackingInfo:trackingInfo];
+}
+
 - (void)addID:(NSString *)elementID trackingInfo:(id <XMPPTrackingInfo>)trackingInfo
 {
 	AssertProperQueue();
@@ -79,6 +116,19 @@
 	[dict setObject:trackingInfo forKey:elementID];
 	
 	[trackingInfo setElementID:elementID];
+	[trackingInfo createTimerWithDispatchQueue:queue];
+}
+
+- (void)addElement:(XMPPElement *)element trackingInfo:(id <XMPPTrackingInfo>)trackingInfo
+{
+	AssertProperQueue();
+    
+    if([[element elementID] length] == 0) return;
+	
+	[dict setObject:trackingInfo forKey:[element elementID]];
+	
+	[trackingInfo setElementID:[element elementID]];
+    [trackingInfo setElement:element];
 	[trackingInfo createTimerWithDispatchQueue:queue];
 }
 
@@ -97,6 +147,13 @@
 	}
 	
 	return NO;
+}
+
+- (NSUInteger)numberOfIDs
+{
+    AssertProperQueue();
+	
+	return [[dict allKeys] count];
 }
 
 - (void)removeID:(NSString *)elementID
@@ -132,6 +189,7 @@
 
 @synthesize timeout;
 @synthesize elementID;
+@synthesize element;
 
 - (id)init
 {

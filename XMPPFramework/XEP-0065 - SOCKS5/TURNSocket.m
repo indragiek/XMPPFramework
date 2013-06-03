@@ -272,6 +272,9 @@ static NSMutableArray *proxyCandidates;
 	
 	turnQueue = dispatch_queue_create("TURNSocket", NULL);
 	
+	turnQueueTag = &turnQueueTag;
+	dispatch_queue_set_specific(turnQueue, turnQueueTag, turnQueueTag, NULL);
+
 	// We want to add this new turn socket to the list of existing sockets.
 	// This gives us a central repository of turn socket objects that we can easily query.
 	
@@ -422,7 +425,7 @@ static NSMutableArray *proxyCandidates;
 		}
 	}};
 	
-	if (dispatch_get_current_queue() == turnQueue)
+	if (dispatch_get_specific(turnQueueTag))
 		block();
 	else
 		dispatch_async(turnQueue, block);
@@ -1483,7 +1486,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)setupDiscoTimer:(NSTimeInterval)timeout
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	if (discoTimer == NULL)
 	{
@@ -1546,7 +1549,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)doDiscoItemsTimeout:(NSString *)theUUID
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	if (state == STATE_PROXY_DISCO_ITEMS)
 	{
@@ -1562,7 +1565,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)doDiscoInfoTimeout:(NSString *)theUUID
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	if (state == STATE_PROXY_DISCO_INFO)
 	{
@@ -1578,7 +1581,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)doDiscoAddressTimeout:(NSString *)theUUID
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	if (state == STATE_PROXY_DISCO_ADDR)
 	{
@@ -1595,7 +1598,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)doTotalTimeout
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	if ((state != STATE_DONE) && (state != STATE_FAILURE))
 	{
@@ -1615,7 +1618,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)succeed
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1638,7 +1641,7 @@ static NSMutableArray *proxyCandidates;
 
 - (void)fail
 {
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue");
 	
 	XMPPLogTrace();
 	
@@ -1663,7 +1666,7 @@ static NSMutableArray *proxyCandidates;
 - (void)cleanup
 {
 	// This method must be run on the turnQueue
-	NSAssert(dispatch_get_current_queue() == turnQueue, @"Invoked on incorrect queue.");
+	NSAssert(dispatch_get_specific(turnQueueTag), @"Invoked on incorrect queue.");
 	
 	XMPPLogTrace();
 	
