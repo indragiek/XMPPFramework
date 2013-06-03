@@ -189,11 +189,6 @@
 	return ([self elementForName:@"body"] != nil);
 }
 
-- (NSString *)body
-{
-	return [[self elementForName:@"body"] stringValue];
-}
-
 - (void)setBody:(NSString *)body
 {
 	NSXMLElement *bodyElement = [self elementForName:@"body"];
