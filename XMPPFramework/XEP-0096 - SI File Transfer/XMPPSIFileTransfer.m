@@ -46,6 +46,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 @property (nonatomic, strong) TURNSocket *socket;
 @property (nonatomic, strong) XMPPInBandBytestream *inBandBytestream;
 @property (nonatomic, weak) id<XMPPSITransferDelegate> delegate;
+@property (nonatomic) dispatch_queue_t delegateQueue;
+
+- (instancetype)initWithDelegateQueue:(dispatch_queue_t)delegateQueue;
 @end
 
 @protocol XMPPSITransferDelegate <NSObject>
@@ -63,6 +66,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	NSMutableDictionary *_outgoingTransfers;
 	NSMutableDictionary *_incomingTransfers;
 	NSMutableSet *_activeTransfers;
+	dispatch_queue_t _transferDelegateQueue;
 }
 
 + (void)load
@@ -78,6 +82,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		_outgoingTransfers = [NSMutableDictionary dictionary];
 		_incomingTransfers = [NSMutableDictionary dictionary];
 		_activeTransfers = [NSMutableSet set];
+		_transferDelegateQueue = dispatch_queue_create("XMPPSIFileTransferDelegateQueue", DISPATCH_QUEUE_SERIAL);
 	}
 	return self;
 }
@@ -137,7 +142,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		XMPPIQ *offer = [XMPPIQ iqWithType:@"set" to:jid elementID:identifier child:si];
 		[xmppStream sendElement:offer];
 		
-		transfer = [XMPPSITransfer new];
+		transfer = [[XMPPSITransfer alloc] initWithDelegateQueue:_transferDelegateQueue];
 		transfer.fileName = name;
 		transfer.data = data;
 		transfer.fileDescription = description;
@@ -151,7 +156,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		transfer.delegate = self;
 		_outgoingTransfers[identifier] = transfer;
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -195,7 +200,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		XMPPIQ *result = [XMPPIQ iqWithType:@"result" to:transfer.remoteJID elementID:transfer.uniqueIdentifier child:si];
 		[xmppStream sendElement:result];
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -215,7 +220,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		XMPPIQ *errorIQ = [XMPPIQ iqWithType:@"error" to:transfer.remoteJID elementID:transfer.uniqueIdentifier child:error];
 		[xmppStream sendElement:errorIQ];
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -424,7 +429,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 			}
 		}];
 		if (hasSupportedStreamMethod) {
-			XMPPSITransfer *transfer = [XMPPSITransfer new];
+			XMPPSITransfer *transfer = [[XMPPSITransfer alloc] initWithDelegateQueue:_transferDelegateQueue];
 			if ([streamMethods containsObject:XMPPSIProfileSOCKS5Transfer]) {
 				transfer.streamMethod = XMPPSIProfileSOCKS5Transfer;
 			} else {
@@ -579,6 +584,16 @@ static NSArray *_supportedTransferMechanisms = nil;
 	NSMutableData *_dataBuffer;
 }
 
+#pragma mark - Initializers
+
+- (instancetype)initWithDelegateQueue:(dispatch_queue_t)delegateQueue
+{
+	if ((self = [super init])) {
+		_delegateQueue = delegateQueue;
+	}
+	return self;
+}
+
 #pragma mark - NSObject
 
 - (NSString *)description
@@ -592,8 +607,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 {
 	[self.delegate xmppTransferDidBegin:self];
 	_asyncSocket = socket;
+	_asyncSocket.delegate = self;
+	_asyncSocket.delegateQueue = _delegateQueue;
 	[_asyncSocket setDelegate:self];
-	[_asyncSocket setDelegateQueue:dispatch_get_current_queue()];
 	if (self.outgoing) {
 		// -1 timeout means no time out. See GCDAsyncSocket docs for more information.
 		NSData *fileData = self.data;

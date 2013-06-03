@@ -38,7 +38,7 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 - (void)handleSoftwareVersionRequest:(XMPPIQ *)iq
 {
 	// This method must be invoked on the moduleQueue
-	NSAssert(dispatch_get_current_queue() == moduleQueue, @"Invoked on incorrect queue");
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	NSXMLElement *query = [NSXMLElement elementWithName:@"query" xmlns:XMLNSJabberIQVersion];
 	if ([self.applicationName length]) {
 		NSXMLElement *name = [NSXMLElement elementWithName:@"name" stringValue:self.applicationName];
@@ -65,7 +65,7 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 	dispatch_block_t block = ^{
 		result = _applicationName;
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -77,7 +77,7 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 	dispatch_block_t block = ^{
 		_applicationName = [applicationName copy];
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
@@ -90,7 +90,7 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 	dispatch_block_t block = ^{
 		result = _applicationVersion;
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_sync(moduleQueue, block);
@@ -102,7 +102,7 @@ NSString* const XMLNSJabberIQVersion = @"jabber:iq:version";
 	dispatch_block_t block = ^{
 		_applicationVersion = [applicationVersion copy];
 	};
-	if (dispatch_get_current_queue() == moduleQueue)
+	if (dispatch_get_specific(moduleQueueTag))
 		block();
 	else
 		dispatch_async(moduleQueue, block);
