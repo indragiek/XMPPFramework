@@ -14,6 +14,7 @@
 #import <XMPPFramework/XMPPMessage+XEP_0085.h>
 #import <XMPPFramework/XMPPMessage+XEP_0071.h>
 #import <XMPPFramework/XMPPvCardTempModule.h>
+#import <XMPPFramework/XMPPvCardTemp.h>
 #import <XMPPFramework/XMPPRoster.h>
 #import <XMPPFramework/XMPPRosterMemoryStorage.h>
 #import <XMPPFramework/XMPPCapabilities.h>
