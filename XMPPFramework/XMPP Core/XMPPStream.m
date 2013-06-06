@@ -1814,6 +1814,7 @@ enum XMPPStreamConfig
 		
 		if ([self supportsOAuth2Authentication]) {
 			someAuth = [[XMPPOAuth2Authentication alloc] initWithStream:self password:password];
+			result = [self authenticate:someAuth error:&err];
 		}
 		else if ([self supportsXFacebookPlatformAuthentication]) {
 			result = [self authenticateWithFacebookAccessToken:password error:&err];
