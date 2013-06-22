@@ -321,7 +321,7 @@ static inline NSUInteger XMPPIBBValidatedBlockSize(NSUInteger size) {
 {
 	dispatch_async(_delegateQueue, ^{ @autoreleasepool {
 		if ([_delegate respondsToSelector:@selector(xmppIBBTransferDidEnd:)]) {
-			[_delegate xmppIBBTransferDidBegin:self];
+			[_delegate xmppIBBTransferDidEnd:self];
 		}
 	}});
 }
