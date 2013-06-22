@@ -15,7 +15,7 @@
  *
  * This implementation currently does NOT support bidirectional transfer.
  */
-@interface XMPPInBandBytestream : XMPPModule
+@interface XMPPInBandBytestream : NSObject
 
 /*
  * Requests a transfer session with the specified JID
@@ -30,10 +30,12 @@
  * it reaches the minimum block size (4KB) at which point the transfer will fail if the responder
  * does not accept it.
  */
-- (id)initOutgoingBytestreamToJID:(XMPPJID *)jid
-						elementID:(NSString *)elementID
-							  sid:(NSString *)sid
-							 data:(NSData *)data;
+- (id)initOutgoingBytestreamWithStream:(XMPPStream *)stream
+								 toJID:(XMPPJID *)jid
+							 elementID:(NSString *)elementID
+								   sid:(NSString *)sid
+							   fileURL:(NSURL *)URL
+								 error:(NSError **)error;
 
 /*
  * Creates a bytestream for an incoming transfer session.
@@ -41,18 +43,12 @@
  * The elementID is the element ID to use for all communication with this remote peer. 
  * Returns nil if iq is not a valid bytestream request stanza
  */
-- (id)initIncomingBytestreamRequest:(XMPPIQ *)iq;
+- (id)initIncomingBytestreamRequest:(XMPPIQ *)iq withStream:(XMPPStream *)stream;
 
 /*
  * Start the transfer 
  */
-- (void)start;
-
-/*
- * The data sent or received. If this transfer is incoming, this property will be nil
- * until the transfer has completed
- */
-@property (nonatomic, strong, readonly) NSData *data;
+- (void)startWithDelegate:(id)aDelegate delegateQueue:(dispatch_queue_t)aDelegateQueue;
 
 /*
  * The remote JID that the transfer is with
@@ -95,7 +91,7 @@
 /*
  * Called when data has been read over the bytestream to update progress
  */
-- (void)xmppIBBTransfer:(XMPPInBandBytestream *)stream didReadDataOfLength:(NSUInteger)length;
+- (void)xmppIBBTransfer:(XMPPInBandBytestream *)stream didReadData:(NSData *)data;
 
 /*
  * Called when the transfer fails. An NSError describing the issue is included where possible

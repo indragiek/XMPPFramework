@@ -38,31 +38,26 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  * streamMethods - Array of stream methods that the file transfer will support. SUPPORTED VALUES:
  *		http://jabber.org/protocol/bytestreams - SOCKS5 Bytestream (XEP-0065)
  *		http://jabber.org/protocol/ibb - In Band Bytestream (XEP-0047)
- * supportsRangedTransfer - Whether the receiver can request a specific range of the file
  * jid - The target JID to send the offer to
  * 
  * Returns an XMPPSITransfer object representing this stream initiation offer.
  */
-- (XMPPSITransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
-												  data:(NSData *)data
-										   description:(NSString *)description
-											  mimeType:(NSString *)mimeType
-									  lastModifiedDate:(NSDate *)date
-										 streamMethods:(NSArray *)methods
-								supportsRangedTransfer:(BOOL)supportsRanged
-												 toJID:(XMPPJID *)jid;
+- (XMPPSITransfer *)sendStreamInitiationOfferForFileURL:(NSURL *)URL
+											description:(NSString *)description
+										  streamMethods:(NSArray *)methods
+												  toJID:(XMPPJID *)jid
+												  error:(NSError **)error;
 
 /*
  * Convenience method for sending a stream initiation offer for the most common use case
  * Fills in the hash & size automatically, and passes the default stream methods supported by 
- * this class (XMPPSIProfileSOCKS5Transfer and XMPPSIProfileIBBTransfer) and YES for supportsRangedTransfer
+ * this class (XMPPSIProfileSOCKS5Transfer and XMPPSIProfileIBBTransfer).
  *
  * Returns an XMPPSITransfer object representing this stream initiation offer.
  */
-- (XMPPSITransfer *)sendStreamInitiationOfferForFileName:(NSString *)name
-												  data:(NSData *)data
-											  mimeType:(NSString *)mimeType
-												 toJID:(XMPPJID *)jid;
+- (XMPPSITransfer *)sendStreamInitiationOfferForFileURL:(NSURL *)URL
+												  toJID:(XMPPJID *)jid
+												  error:(NSError **)error;
 
 #pragma mark - Receiving
 /*
@@ -125,14 +120,13 @@ extern NSString* const XMPPSIProfileIBBTransfer; // @"http://jabber.org/protocol
  */
 @property (nonatomic, strong, readonly) XMPPJID *remoteJID;
 /*
- * The data being transferred (either written or received). 
- * If this is an incoming transfer, data will be nil until the transfer has completed
+ * The URL of the file being transferred or received.
+ * If this is an outgoing transfer, this will be the URL of the 
+ * file being sent (copied to a temporary location)
+ * If this is an incoming transfer, it will point to the URL at
+ * which the downloaded file can be found after the transfer is complete.
  */
-@property (nonatomic, strong, readonly) NSData *data;
-/*
- * The range of the data being transferred. Returns NSZeroRange if all of the data is being transferred.
- */
-@property (nonatomic, assign, readonly) NSRange dataRange;
+@property (nonatomic, strong, readonly) NSURL *URL;
 /*
  * The total number of bytes to transfer. KVO observable.
  */
