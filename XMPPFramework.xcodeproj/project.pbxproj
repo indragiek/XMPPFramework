@@ -146,6 +146,8 @@
 		038D5DCC16C15C5A001593F1 /* XMPPCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 038D5DC916C15C5A001593F1 /* XMPPCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		038D5DCD16C15C5A001593F1 /* XMPPCoreDataStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 038D5DCA16C15C5A001593F1 /* XMPPCoreDataStorage.m */; };
 		038D5DCE16C15C5A001593F1 /* XMPPCoreDataStorageProtected.h in Headers */ = {isa = PBXBuildFile; fileRef = 038D5DCB16C15C5A001593F1 /* XMPPCoreDataStorageProtected.h */; };
+		03A33C2E1776CB38008ECCC9 /* FileMD5Hash.c in Sources */ = {isa = PBXBuildFile; fileRef = 03A33C2C1776CB38008ECCC9 /* FileMD5Hash.c */; };
+		03A33C2F1776CB38008ECCC9 /* FileMD5Hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 03A33C2D1776CB38008ECCC9 /* FileMD5Hash.h */; };
 		03B9E8F116C8B4C2002F2730 /* TURNSocket.h in Headers */ = {isa = PBXBuildFile; fileRef = 03B9E8EF16C8B4C2002F2730 /* TURNSocket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		03B9E8F216C8B4C2002F2730 /* TURNSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 03B9E8F016C8B4C2002F2730 /* TURNSocket.m */; };
 /* End PBXBuildFile section */
@@ -299,6 +301,8 @@
 		039367F3169D2C8C00986388 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		03936804169D2CE800986388 /* libresolv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libresolv.dylib; path = usr/lib/libresolv.dylib; sourceTree = SDKROOT; };
 		03936806169D2D2700986388 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		03A33C2C1776CB38008ECCC9 /* FileMD5Hash.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FileMD5Hash.c; path = "XEP-0096 - SI File Transfer/FileMD5Hash.c"; sourceTree = "<group>"; };
+		03A33C2D1776CB38008ECCC9 /* FileMD5Hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileMD5Hash.h; path = "XEP-0096 - SI File Transfer/FileMD5Hash.h"; sourceTree = "<group>"; };
 		03B9E8EF16C8B4C2002F2730 /* TURNSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TURNSocket.h; path = "XMPPFramework/XEP-0065 - SOCKS5/TURNSocket.h"; sourceTree = SOURCE_ROOT; };
 		03B9E8F016C8B4C2002F2730 /* TURNSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TURNSocket.m; path = "XMPPFramework/XEP-0065 - SOCKS5/TURNSocket.m"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -402,6 +406,8 @@
 		0375AD0216C213300029EFF1 /* XEP-0096 - SI File Transfer */ = {
 			isa = PBXGroup;
 			children = (
+				03A33C2C1776CB38008ECCC9 /* FileMD5Hash.c */,
+				03A33C2D1776CB38008ECCC9 /* FileMD5Hash.h */,
 				0375AD0316C213530029EFF1 /* XMPPSIFileTransfer.h */,
 				0375AD0416C213530029EFF1 /* XMPPSIFileTransfer.m */,
 			);
@@ -793,6 +799,7 @@
 				035B5BE016A365830098CB09 /* XMPPUserMemoryStorageObject.h in Headers */,
 				035B5BE116A365830098CB09 /* XMPPResource.h in Headers */,
 				035B5BE216A365830098CB09 /* XMPPRoster.h in Headers */,
+				03A33C2F1776CB38008ECCC9 /* FileMD5Hash.h in Headers */,
 				035B5BE416A365830098CB09 /* XMPPUser.h in Headers */,
 				035B5BE816A365830098CB09 /* XMPPvCardTemp.h in Headers */,
 				035B5BE916A365830098CB09 /* XMPPvCardTempAdr.h in Headers */,
@@ -947,6 +954,7 @@
 				035B5BAC16A364000098CB09 /* XMPPvCardTempLabel.m in Sources */,
 				035B5BAD16A364000098CB09 /* XMPPvCardTempModule.m in Sources */,
 				035B5BAE16A364000098CB09 /* XMPPvCardTempTel.m in Sources */,
+				03A33C2E1776CB38008ECCC9 /* FileMD5Hash.c in Sources */,
 				035B5BAF16A364000098CB09 /* XMPPMessage+XEP_0071.m in Sources */,
 				035B5BB016A364000098CB09 /* NSDate+XMPPDateTimeProfiles.m in Sources */,
 				035B5BB116A364000098CB09 /* XMPPDateTimeProfiles.m in Sources */,
