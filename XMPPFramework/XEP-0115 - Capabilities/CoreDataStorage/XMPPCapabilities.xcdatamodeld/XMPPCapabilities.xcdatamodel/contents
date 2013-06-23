@@ -13,7 +13,7 @@
         <attribute name="hashStr" optional="YES" attributeType="String" indexed="YES">
             <userInfo/>
         </attribute>
-        <relationship name="resources" optional="YES" toMany="YES" deletionRule="No Action" destinationEntity="XMPPCapsResourceCoreDataStorageObject" indexed="YES">
+        <relationship name="resources" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="XMPPCapsResourceCoreDataStorageObject" inverseName="caps" inverseEntity="XMPPCapsResourceCoreDataStorageObject" indexed="YES">
             <userInfo/>
         </relationship>
         <userInfo>
@@ -45,7 +45,7 @@
         <attribute name="ver" optional="YES" attributeType="String">
             <userInfo/>
         </attribute>
-        <relationship name="caps" optional="YES" minCount="1" maxCount="1" deletionRule="No Action" destinationEntity="XMPPCapsCoreDataStorageObject" indexed="YES">
+        <relationship name="caps" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="XMPPCapsCoreDataStorageObject" inverseName="resources" inverseEntity="XMPPCapsCoreDataStorageObject" indexed="YES">
             <userInfo/>
         </relationship>
         <userInfo>
