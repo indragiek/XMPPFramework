@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="3381.3" systemVersion="13A476u" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="XMPPCapsCoreDataStorageObject" representedClassName="XMPPCapsCoreDataStorageObject">
+        <attribute name="capabilities" optional="YES" transient="YES">
+            <userInfo/>
+        </attribute>
+        <attribute name="capabilitiesStr" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="hashAlgorithm" optional="YES" attributeType="String" indexed="YES">
+            <userInfo/>
+        </attribute>
+        <attribute name="hashStr" optional="YES" attributeType="String" indexed="YES">
+            <userInfo/>
+        </attribute>
+        <relationship name="resources" optional="YES" toMany="YES" deletionRule="No Action" destinationEntity="XMPPCapsResourceCoreDataStorageObject" indexed="YES">
+            <userInfo/>
+        </relationship>
+        <userInfo>
+            <entry key="com.apple.syncservices.IdentityProperties" value=""/>
+        </userInfo>
+    </entity>
+    <entity name="XMPPCapsResourceCoreDataStorageObject" representedClassName="XMPPCapsResourceCoreDataStorageObject">
+        <attribute name="ext" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="failed" attributeType="Boolean" defaultValueString="NO">
+            <userInfo/>
+        </attribute>
+        <attribute name="hashAlgorithm" optional="YES" attributeType="String" indexed="YES">
+            <userInfo/>
+        </attribute>
+        <attribute name="hashStr" optional="YES" attributeType="String" indexed="YES">
+            <userInfo/>
+        </attribute>
+        <attribute name="jidStr" attributeType="String" indexed="YES">
+            <userInfo/>
+        </attribute>
+        <attribute name="node" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <attribute name="streamBareJidStr" attributeType="String" indexed="YES">
+            <userInfo/>
+        </attribute>
+        <attribute name="ver" optional="YES" attributeType="String">
+            <userInfo/>
+        </attribute>
+        <relationship name="caps" optional="YES" minCount="1" maxCount="1" deletionRule="No Action" destinationEntity="XMPPCapsCoreDataStorageObject" indexed="YES">
+            <userInfo/>
+        </relationship>
+        <userInfo>
+            <entry key="com.apple.syncservices.IdentityProperties" value=""/>
+        </userInfo>
+    </entity>
+    <elements>
+        <element name="XMPPCapsCoreDataStorageObject" positionX="0" positionY="0" width="0" height="0"/>
+        <element name="XMPPCapsResourceCoreDataStorageObject" positionX="0" positionY="0" width="0" height="0"/>
+    </elements>
+</model>
