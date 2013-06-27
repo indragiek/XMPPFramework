@@ -67,7 +67,6 @@ static NSArray *_supportedTransferMechanisms = nil;
 	NSMutableDictionary *_outgoingTransfers;
 	NSMutableDictionary *_incomingTransfers;
 	NSMutableSet *_activeTransfers;
-	dispatch_queue_t _transferDelegateQueue;
 }
 
 + (void)load
@@ -83,16 +82,8 @@ static NSArray *_supportedTransferMechanisms = nil;
 		_outgoingTransfers = [NSMutableDictionary dictionary];
 		_incomingTransfers = [NSMutableDictionary dictionary];
 		_activeTransfers = [NSMutableSet set];
-		_transferDelegateQueue = dispatch_queue_create("XMPPSIFileTransferDelegateQueue", NULL);
 	}
 	return self;
-}
-
-- (void)dealloc
-{
-#if !OS_OBJECT_USE_OBJC
-	dispatch_release(_transferDelegateQueue);
-#endif
 }
 
 #pragma mark - Public API
@@ -159,7 +150,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		
 		// Create a copy of the file in a temporary location so deleting
 		// it while it's being transferred won't do anything.
-		NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:fileName];
+		NSString *tempPath = [[NSTemporaryDirectory() stringByAppendingPathComponent:identifier] stringByAppendingPathExtension:fileName.pathExtension];
 		NSURL *tempURL = [NSURL fileURLWithPath:tempPath];
 		if (![[NSFileManager defaultManager] copyItemAtURL:URL toURL:tempURL error:error]) {
 			return;
@@ -168,7 +159,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		XMPPIQ *offer = [XMPPIQ iqWithType:@"set" to:jid elementID:identifier child:si];
 		[xmppStream sendElement:offer];
 		
-		transfer = [[XMPPSITransfer alloc] initWithDelegateQueue:_transferDelegateQueue];
+		transfer = [[XMPPSITransfer alloc] initWithDelegateQueue:moduleQueue];
 		transfer.fileName = fileName;
 		transfer.URL = tempURL;
 		transfer.fileDescription = description;
@@ -312,11 +303,13 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 - (void)xmppTransferDidBegin:(XMPPSITransfer *)transfer
 {
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[multicastDelegate xmppSIFileTransfer:self transferDidBegin:transfer];
 }
 
 - (void)xmppTransferUpdatedProgress:(XMPPSITransfer *)transfer
 {
+	XMPP_MODULE_ASSERT_CORRECT_QUEUE();
 	[multicastDelegate xmppSIFileTransfer:self transferUpdatedProgress:transfer];
 }
 
@@ -434,7 +427,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 			}
 		}];
 		if (hasSupportedStreamMethod) {
-			XMPPSITransfer *transfer = [[XMPPSITransfer alloc] initWithDelegateQueue:_transferDelegateQueue];
+			XMPPSITransfer *transfer = [[XMPPSITransfer alloc] initWithDelegateQueue:moduleQueue];
 			if ([streamMethods containsObject:XMPPSIProfileSOCKS5Transfer]) {
 				transfer.streamMethod = XMPPSIProfileSOCKS5Transfer;
 			} else {
