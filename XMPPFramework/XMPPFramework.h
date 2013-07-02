@@ -24,6 +24,7 @@
 #import <XMPPFramework/TURNSocket.h>
 #import <XMPPFramework/XMPPInBandBytestream.h>
 #import <XMPPFramework/XMPPReconnect.h>
+#import <XMPPFramework/XMPPFacebookOwnMessage.h>
 
 // Logging
 #import <XMPPFramework/DDAbstractDatabaseLogger.h>

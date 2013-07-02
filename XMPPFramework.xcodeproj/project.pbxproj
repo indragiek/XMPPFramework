@@ -12,6 +12,8 @@
 		0317668A174B318C000DA076 /* DispatchQueueLogFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = 03176688174B318C000DA076 /* DispatchQueueLogFormatter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0317668B174B318C000DA076 /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 03176689174B318C000DA076 /* DispatchQueueLogFormatter.m */; };
 		031A8C0D1777B5CC004E90CB /* XMPPCapabilities.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 031A8C0B1777B5CC004E90CB /* XMPPCapabilities.xcdatamodeld */; };
+		031E227B1782AF3F0084525F /* XMPPFacebookOwnMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 031E22791782AF3F0084525F /* XMPPFacebookOwnMessage.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		031E227C1782AF3F0084525F /* XMPPFacebookOwnMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 031E227A1782AF3F0084525F /* XMPPFacebookOwnMessage.m */; };
 		032D3C5F16D4B23B009E5AD8 /* XMPPReconnect.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D3C5D16D4B23B009E5AD8 /* XMPPReconnect.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		032D3C6016D4B23B009E5AD8 /* XMPPReconnect.m in Sources */ = {isa = PBXBuildFile; fileRef = 032D3C5E16D4B23B009E5AD8 /* XMPPReconnect.m */; };
 		032D586416C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -158,6 +160,8 @@
 		03176688174B318C000DA076 /* DispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DispatchQueueLogFormatter.h; path = GCDAsyncSocket/CocoaLumberjack/Extensions/DispatchQueueLogFormatter.h; sourceTree = "<group>"; };
 		03176689174B318C000DA076 /* DispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DispatchQueueLogFormatter.m; path = GCDAsyncSocket/CocoaLumberjack/Extensions/DispatchQueueLogFormatter.m; sourceTree = "<group>"; };
 		031A8C0C1777B5CC004E90CB /* XMPPCapabilities.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = XMPPCapabilities.xcdatamodel; sourceTree = "<group>"; };
+		031E22791782AF3F0084525F /* XMPPFacebookOwnMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMPPFacebookOwnMessage.h; path = "XMPPFramework/Service Specific Extensions/Facebook/XMPPFacebookOwnMessage.h"; sourceTree = "<group>"; };
+		031E227A1782AF3F0084525F /* XMPPFacebookOwnMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMPPFacebookOwnMessage.m; path = "XMPPFramework/Service Specific Extensions/Facebook/XMPPFacebookOwnMessage.m"; sourceTree = "<group>"; };
 		032D3C5D16D4B23B009E5AD8 /* XMPPReconnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPReconnect.h; sourceTree = "<group>"; };
 		032D3C5E16D4B23B009E5AD8 /* XMPPReconnect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPReconnect.m; sourceTree = "<group>"; };
 		032D585B16C158A1009577E1 /* XMPPCapabilitiesCoreDataStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPCapabilitiesCoreDataStorage.h; sourceTree = "<group>"; };
@@ -333,6 +337,24 @@
 			name = PortMapper;
 			sourceTree = "<group>";
 		};
+		031E22731782A1D60084525F /* Service Specific Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				031E22741782A1DF0084525F /* Facebook */,
+			);
+			name = "Service Specific Extensions";
+			path = ..;
+			sourceTree = "<group>";
+		};
+		031E22741782A1DF0084525F /* Facebook */ = {
+			isa = PBXGroup;
+			children = (
+				031E22791782AF3F0084525F /* XMPPFacebookOwnMessage.h */,
+				031E227A1782AF3F0084525F /* XMPPFacebookOwnMessage.m */,
+			);
+			name = Facebook;
+			sourceTree = "<group>";
+		};
 		032D3C5C16D4B23B009E5AD8 /* Reconnect */ = {
 			isa = PBXGroup;
 			children = (
@@ -476,6 +498,7 @@
 				032D3C5C16D4B23B009E5AD8 /* Reconnect */,
 				039366EC169D26B400986388 /* Utilities */,
 				032D586C16C158AB009577E1 /* Core Data */,
+				031E22731782A1D60084525F /* Service Specific Extensions */,
 				038C016D16C18E8500DC2924 /* XEP-0092 - Software Version */,
 				032D585816C158A1009577E1 /* XEP-0115 - Capabilities */,
 				039366F6169D26B400986388 /* XEP-0054 - vCard */,
@@ -841,6 +864,7 @@
 				035B5BE716A365830098CB09 /* RFImageToDataTransformer.h in Headers */,
 				035B5BF116A365830098CB09 /* NSDate+XMPPDateTimeProfiles.h in Headers */,
 				035B5BF216A365830098CB09 /* XMPPDateTimeProfiles.h in Headers */,
+				031E227B1782AF3F0084525F /* XMPPFacebookOwnMessage.h in Headers */,
 				035B5BF716A365830098CB09 /* XMPPElement+Delay.h in Headers */,
 				035B5BFA16A365830098CB09 /* XMPPIDTracker.h in Headers */,
 				035B5BFB16A365830098CB09 /* XMPPInternal.h in Headers */,
@@ -936,6 +960,7 @@
 				035B5B9A16A364000098CB09 /* XMPPDigestMD5Authentication.m in Sources */,
 				035B5B9B16A364000098CB09 /* XMPPPlainAuthentication.m in Sources */,
 				035B5B9C16A364000098CB09 /* NSData+XMPP.m in Sources */,
+				031E227C1782AF3F0084525F /* XMPPFacebookOwnMessage.m in Sources */,
 				035B5B9D16A364000098CB09 /* NSNumber+XMPP.m in Sources */,
 				035B5B9E16A364000098CB09 /* NSXMLElement+XMPP.m in Sources */,
 				035B5B9F16A364000098CB09 /* LibIDN.m in Sources */,
