@@ -33,14 +33,12 @@ typedef NSUInteger XMPPPresenceShowType;
 - (id)initWithType:(NSString *)type;
 - (id)initWithType:(NSString *)type to:(XMPPJID *)to;
 
-@property (nonatomic, retain) NSString *type;
-@property (nonatomic, retain) NSString *show;
+@property (nonatomic, strong) NSString *type;
+@property (nonatomic, strong) NSString *show;
 @property (nonatomic, assign) XMPPPresenceShowType showType;
-@property (nonatomic, retain) NSString *status;
+@property (nonatomic, strong) NSString *status;
 @property (nonatomic, assign) NSInteger priority;
 @property (nonatomic, assign) BOOL available;
-@property (nonatomic, strong) XMPPJID *from;
-@property (nonatomic, strong) XMPPJID *to;
 
 - (BOOL)isErrorPresence;
 

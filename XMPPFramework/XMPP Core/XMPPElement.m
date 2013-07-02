@@ -84,6 +84,12 @@
 	return [[self attributeForName:@"id"] stringValue];
 }
 
+- (void)setElementID:(NSString *)elementID
+{
+	[self removeAttributeForName:@"id"];
+	[self addAttributeWithName:@"id" stringValue:elementID];
+}
+
 - (NSString *)toStr
 {
 	return [[self attributeForName:@"to"] stringValue];
@@ -94,15 +100,36 @@
 	return [[self attributeForName:@"from"] stringValue];
 }
 
-- (XMPPJID *)to
-{
-	return [XMPPJID jidWithString:[self toStr]];
-}
-
 - (XMPPJID *)from
 {
-	return [XMPPJID jidWithString:[self fromStr]];
+	NSString *from = [self attributeStringValueForName:@"from"];
+	if ([from length])
+		return [XMPPJID jidWithString:from];
+	return nil;
 }
+
+- (void)setFrom:(XMPPJID *)from
+{
+	if (!from) return;
+	[self removeAttributeForName:@"from"];
+	[self addAttributeWithName:@"from" stringValue:[from description]];
+}
+
+- (XMPPJID *)to
+{
+	NSString *to = [self attributeStringValueForName:@"to"];
+	if ([to length])
+		return [XMPPJID jidWithString:to];
+	return nil;
+}
+
+- (void)setTo:(XMPPJID *)to
+{
+	if (!to) return;
+	[self removeAttributeForName:@"to"];
+	[self addAttributeWithName:@"to" stringValue:[to description]];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark To and From Methods

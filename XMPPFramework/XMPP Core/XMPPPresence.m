@@ -185,36 +185,6 @@
 	self.type = available ? nil : @"unavailable";
 }
 
-- (XMPPJID *)from
-{
-	NSString *from = [self attributeStringValueForName:@"from"];
-	if ([from length])
-		return [XMPPJID jidWithString:from];
-	return nil;
-}
-
-- (void)setFrom:(XMPPJID *)from
-{
-	if (!from) return;
-	[self removeAttributeForName:@"from"];
-	[self addAttributeWithName:@"from" stringValue:[from description]];
-}
-
-- (XMPPJID *)to
-{
-	NSString *to = [self attributeStringValueForName:@"to"];
-	if ([to length])
-		return [XMPPJID jidWithString:to];
-	return nil;
-}
-
-- (void)setTo:(XMPPJID *)to
-{
-	if (!to) return;
-	[self removeAttributeForName:@"to"];
-	[self addAttributeWithName:@"to" stringValue:[to description]];
-}
-
 - (int)intShow
 {
 	NSString *show = [self show];
