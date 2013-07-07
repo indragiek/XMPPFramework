@@ -16,7 +16,6 @@ static NSArray *_permittedElementList = nil;
 
 + (void)load
 {
-	[super load];
 	_prefixes = @[@"", @"cha:"];
 	NSArray *elements = @[XMPPChatStateActive, XMPPChatStateComposing, XMPPChatStatePaused, XMPPChatStateInactive, XMPPChatStateGone];
 	

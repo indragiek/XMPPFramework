@@ -71,7 +71,6 @@ static NSArray *_supportedTransferMechanisms = nil;
 
 + (void)load
 {
-	[super load];
 	_supportedTransferMechanisms = @[XMPPSIProfileIBBTransfer, XMPPSIProfileSOCKS5Transfer];
 	[TURNSocket setProxyCandidates:nil];
 }
