@@ -114,7 +114,9 @@ static NSArray *_supportedTransferMechanisms = nil;
 		[file addAttributeWithName:@"hash" stringValue:hash];
 		
 		NSNumber *fileSize = nil;
-		[URL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:nil];
+		if (![URL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:error]) {
+			return;
+		}
 		[file addAttributeWithName:@"size" stringValue:[fileSize stringValue]];
 		
 		NSDate *lastModifiedDate = nil;
