@@ -582,6 +582,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 	NSError *_transferError;
 	dispatch_queue_t _transferCallbackQueue;
 	NSFileHandle *_fileHandle;
+	double _remainingBytesForCurrentWrite;
 }
 
 #pragma mark - Initializers
@@ -669,13 +670,20 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (void)socket:(GCDAsyncSocket *)sock didWritePartialDataOfLength:(NSUInteger)partialLength tag:(long)tag
 {
 	[self incrementTransferredBytesBy:partialLength];
+	_remainingBytesForCurrentWrite -= partialLength;
 }
 
 - (void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
+	if (_remainingBytesForCurrentWrite) {
+		[self incrementTransferredBytesBy:_remainingBytesForCurrentWrite];
+		_remainingBytesForCurrentWrite = 0;
+	}
+	
 	if (!_transferComplete && ![self writeBytesToSocket]) {
 		_transferComplete = YES;
 		[_fileHandle closeFile];
+		[_asyncSocket disconnectAfterReadingAndWriting];
 	}
 }
 
@@ -764,8 +772,10 @@ static NSArray *_supportedTransferMechanisms = nil;
 - (BOOL)writeBytesToSocket
 {
 	NSData *data = [_fileHandle readDataOfLength:XMPPSITransferReadBlockSize];
-	if (data) {
-		[_asyncSocket writeData:data withTimeout:-1 tag:0];
+	NSUInteger length = [data length];
+	if (length) {
+		_remainingBytesForCurrentWrite = length;
+		[_asyncSocket writeData:data withTimeout:-1 tag:length];
 		return YES;
 	}
 	return NO;
