@@ -1200,6 +1200,7 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 **/
 - (void)handleDiscoResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
+	NSParameterAssert(jid);
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked on incorrect queue");
 	
