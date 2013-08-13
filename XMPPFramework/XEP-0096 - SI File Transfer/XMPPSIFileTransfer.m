@@ -616,6 +616,7 @@ static NSArray *_supportedTransferMechanisms = nil;
 		NSString *writePath = [NSTemporaryDirectory() stringByAppendingPathComponent:self.fileName];
 		self.URL = [NSURL fileURLWithPath:writePath];
 		
+		[NSFileManager.defaultManager createFileAtPath:self.URL.path contents:nil attributes:nil];
 		_fileHandle = [NSFileHandle fileHandleForWritingToURL:self.URL error:&error];
 	}
 	if (!_fileHandle) {
