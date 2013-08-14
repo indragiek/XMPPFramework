@@ -1200,7 +1200,6 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 **/
 - (void)handleDiscoResponse:(NSXMLElement *)querySubElement fromJID:(XMPPJID *)jid
 {
-	NSParameterAssert(jid);
 	// This method must be invoked on the moduleQueue
 	NSAssert(dispatch_get_specific(moduleQueueTag), @"Invoked on incorrect queue");
 	
@@ -1513,7 +1512,8 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	// </iq>
 	
 	NSXMLElement *query = [iq elementForName:@"query" xmlns:XMLNS_DISCO_INFO];
-	if (query == nil)
+	XMPPJID *from = [iq from];
+	if (query == nil || from == nil)
 	{
 		return NO;
 	}
@@ -1534,11 +1534,11 @@ static NSInteger sortFieldValues(NSXMLElement *value1, NSXMLElement *value2, voi
 	}
 	else if ([type isEqualToString:@"result"])
 	{
-		[self handleDiscoResponse:query fromJID:[iq from]];
+		[self handleDiscoResponse:query fromJID:from];
 	}
 	else if ([type isEqualToString:@"error"])
 	{
-		[self handleDiscoErrorResponse:query fromJID:[iq from]];
+		[self handleDiscoErrorResponse:query fromJID:from];
 	}
 	else
 	{
