@@ -672,12 +672,19 @@
 			XMPPUserMemoryStorageObject *user = [roster objectForKey:jid];
 			if (user)
 			{
-				[user updateWithItem:item];
-				
-				XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
-				
-				[[self multicastDelegate] xmppRoster:self didUpdateUser:user];
-				[[self multicastDelegate] xmppRosterDidChange:self];
+				if ([jid.domain isEqualToString:@"chat.facebook.com"] && [[item attributeStringValueForName:@"name"] isEqualToString:@""]) {
+					// Ignore these updates. This is a known bug in the Facebook XMPP
+					// API that sends out a ton of these updates in succession.
+					//
+					// TODO: Remove once Facebook has fixed the issue on their end.
+				} else {
+					[user updateWithItem:item];
+					
+					XMPPLogVerbose(@"roster(%lu): %@", (unsigned long)[roster count], roster);
+					
+					[[self multicastDelegate] xmppRoster:self didUpdateUser:user];
+					[[self multicastDelegate] xmppRosterDidChange:self];
+				}
 			}
 			else
 			{
