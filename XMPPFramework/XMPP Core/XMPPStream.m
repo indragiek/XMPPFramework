@@ -1836,7 +1836,7 @@ enum XMPPStreamConfig
 		}
 		else if ([self supportsDeprecatedPlainAuthentication])
 		{
-			someAuth = [[XMPPDeprecatedDigestAuthentication alloc] initWithStream:self password:password];
+			someAuth = [[XMPPDeprecatedPlainAuthentication alloc] initWithStream:self password:password];
 			result = [self authenticate:someAuth error:&err];
 		}
 		else
