@@ -3,7 +3,7 @@
 //  XMPPFramework
 //
 //  Created by Indragie Karunaratne on 7/1/2013.
-//  Copyright (c) 2013 nonatomic. All rights reserved.
+//  Copyright (c) 2013 Indragie Karunaratne. All rights reserved.
 //
 
 #import <XMPPFramework/XMPPFramework.h>
