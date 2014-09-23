@@ -32,4 +32,4 @@
 #import <XMPPFramework/DDLog.h>
 #import <XMPPFramework/DDTTYLogger.h>
 #import <XMPPFramework/DDFileLogger.h>
-#import <XMPPFramework/DispatchQueueLogFormatter.h>
+#import <XMPPFramework/DDDispatchQueueLogFormatter.h>
